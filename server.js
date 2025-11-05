@@ -297,6 +297,10 @@ app.get('/project-detail', (req, res) => {
 });
 
 // SQLite 데이터베이스 연결
+if (!fs.existsSync(path.join(__dirname, 'database'))) {
+    fs.mkdirSync(path.join(__dirname, 'database'), { recursive: true });
+}
+
 const dbPath = path.join(__dirname, 'database', 'database.sqlite');
 const db = new sqlite3.Database(dbPath);
 
@@ -1473,6 +1477,9 @@ app.post('/api/upload', authenticateUser, upload.single('image'), (req, res) => 
         return res.status(400).json({ error: '이미지 파일이 필요합니다.' });
     }
     
+    if (!fs.existsSync(path.join(__dirname, 'public', 'uploads'))) {
+        fs.mkdirSync(path.join(__dirname, 'public', 'uploads'), { recursive: true });
+    }
     const imageUrl = `/uploads/${req.file.filename}`;
     res.json({
         success: true,
