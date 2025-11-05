@@ -39,6 +39,9 @@ setInterval(() => {
     }
 }, 60 * 1000);
 
+// Trust proxy
+app.set('trust proxy', process.env.TRUST_PROXY === 'true' ? true : 1);
+
 // 보안 헤더 설정
 app.use(helmet({
     contentSecurityPolicy: {
@@ -61,7 +64,7 @@ const apiLimiter = rateLimit({
     standardHeaders: true,
     legacyHeaders: false,
     handler: (req, res) => {
-        res.status(429).json({ 
+        res.status(429).json({
             error: '너무 많은 요청이 발생했습니다. 잠시 후 다시 시도해주세요.',
             retryAfter: Math.ceil(15 * 60) // 15분을 초 단위로
         });
@@ -74,7 +77,7 @@ const authLimiter = rateLimit({
     standardHeaders: true,
     legacyHeaders: false,
     handler: (req, res) => {
-        res.status(429).json({ 
+        res.status(429).json({
             error: '너무 많은 로그인 시도가 있었습니다. 잠시 후 다시 시도해주세요.',
             retryAfter: Math.ceil(15 * 60) // 15분을 초 단위로
         });
@@ -113,18 +116,18 @@ const storage = multer.diskStorage({
     filename: function (req, file, cb) {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
         const ext = path.extname(file.originalname).toLowerCase();
-        
+
         // 확장자 검증
         if (!allowedExtensions.includes(ext)) {
             return cb(new Error('허용되지 않은 파일 형식입니다.'), false);
         }
-        
+
         const sanitizedName = sanitizeFilename(path.basename(file.originalname, ext));
         cb(null, uniqueSuffix + '-' + sanitizedName + ext);
     }
 });
 
-const upload = multer({ 
+const upload = multer({
     storage: storage,
     limits: {
         fileSize: 10 * 1024 * 1024, // 10MB 제한
@@ -135,13 +138,13 @@ const upload = multer({
         if (!allowedMimeTypes.includes(file.mimetype.toLowerCase())) {
             return cb(new Error('이미지 파일만 업로드 가능합니다.'), false);
         }
-        
+
         // 확장자 검증
         const ext = path.extname(file.originalname).toLowerCase();
         if (!allowedExtensions.includes(ext)) {
             return cb(new Error('허용되지 않은 파일 확장자입니다.'), false);
         }
-        
+
         cb(null, true);
     }
 });
@@ -174,11 +177,11 @@ function sanitizeInput(req, res, next) {
 // JWT 토큰 검증 미들웨어 (사용자)
 function authenticateUser(req, res, next) {
     const token = req.headers.authorization?.split(' ')[1] || req.cookies?.token;
-    
+
     if (!token) {
         return res.status(401).json({ error: '인증이 필요합니다.' });
     }
-    
+
     try {
         const decoded = jwt.verify(token, JWT_SECRET);
         req.user = decoded;
@@ -212,49 +215,49 @@ function authenticateAdmin(req, res, next) {
     const token = req.headers.authorization?.split(' ')[1] || req.cookies?.adminToken;
     const ipAddress = getClientIp(req);
     const userAgent = req.headers['user-agent'] || 'unknown';
-    
+
     if (!token) {
         return res.status(401).json({ error: '관리자 인증이 필요합니다.' });
     }
-    
+
     try {
         const decoded = jwt.verify(token, JWT_ADMIN_SECRET);
-        
+
         // 토큰 만료 시간 확인 (추가 검증)
         const now = Math.floor(Date.now() / 1000);
         if (decoded.exp && decoded.exp < now) {
             return res.status(401).json({ error: '세션이 만료되었습니다. 다시 로그인해주세요.' });
         }
-        
+
         // 관리자 계정 상태 확인
         db.get('SELECT * FROM admins WHERE id = ?', [decoded.id], (err, admin) => {
             if (err || !admin) {
                 return res.status(401).json({ error: '유효하지 않은 관리자 계정입니다.' });
             }
-            
+
             // 계정 잠금 확인
             if (admin.locked_until && new Date(admin.locked_until) > new Date()) {
                 return res.status(403).json({ error: '계정이 잠금되었습니다.' });
             }
-            
+
             // 현재 활성 세션 토큰 확인 (다른 PC에서 로그인했는지 확인)
             if (admin.current_session_token && admin.current_session_token !== token) {
-                return res.status(401).json({ 
+                return res.status(401).json({
                     error: '다른 위치에서 로그인하여 세션이 종료되었습니다. 다시 로그인해주세요.',
                     sessionTerminated: true
                 });
             }
-            
+
             // 세션 토큰이 없는 경우도 무효 (새 로그인 필요)
             if (!admin.current_session_token) {
-                return res.status(401).json({ 
+                return res.status(401).json({
                     error: '세션이 만료되었습니다. 다시 로그인해주세요.',
                     sessionTerminated: true
                 });
             }
-            
+
             req.admin = decoded;
-            
+
             // 관리자 활동 로깅 (중요한 작업만)
             const action = req.method + ' ' + req.path;
             if (req.method !== 'GET' || req.path.includes('/api/stats')) {
@@ -263,7 +266,7 @@ function authenticateAdmin(req, res, next) {
                     [decoded.id, action, ipAddress, userAgent]
                 );
             }
-            
+
             next();
         });
     } catch (error) {
@@ -325,7 +328,7 @@ function initDatabase() {
                 current_session_token TEXT
             )
         `);
-        
+
         // 관리자 활동 로그 테이블
         db.run(`
             CREATE TABLE IF NOT EXISTS admin_activity_logs (
@@ -339,7 +342,7 @@ function initDatabase() {
                 FOREIGN KEY (admin_id) REFERENCES admins(id)
             )
         `);
-        
+
         // 관리자 로그인 시도 로그 테이블
         db.run(`
             CREATE TABLE IF NOT EXISTS admin_login_attempts (
@@ -443,7 +446,7 @@ function initDatabase() {
             INSERT OR IGNORE INTO admins (username, password, pin) 
             VALUES ('admin', ?, ?)
         `, [defaultPassword, defaultPin]);
-        
+
         // 기존 관리자 계정에 기본 PIN 설정 (PIN이 없는 경우)
         db.run(`
             UPDATE admins 
@@ -459,11 +462,11 @@ function initDatabase() {
 app.post('/api/admin/login-step1', sanitizeInput, (req, res) => {
     const { username, password } = req.body;
     const ipAddress = getClientIp(req);
-    
+
     if (!username || !password) {
         return res.status(400).json({ error: '사용자명과 비밀번호를 입력해주세요.' });
     }
-    
+
     db.get(
         'SELECT * FROM admins WHERE username = ?',
         [username],
@@ -491,8 +494,8 @@ app.post('/api/admin/login-step1', sanitizeInput, (req, res) => {
                     'INSERT INTO admin_login_attempts (username, ip_address, success) VALUES (?, ?, ?)',
                     [username, ipAddress, 0]
                 );
-                return res.status(403).json({ 
-                    error: `계정이 잠금되었습니다. ${lockTime}분 후 다시 시도해주세요.` 
+                return res.status(403).json({
+                    error: `계정이 잠금되었습니다. ${lockTime}분 후 다시 시도해주세요.`
                 });
             }
 
@@ -507,10 +510,10 @@ app.post('/api/admin/login-step1', sanitizeInput, (req, res) => {
                     pinAttempts: 0
                 };
                 tempAuthSessions.set(sessionId, sessionData);
-                
+
                 // 세션 ID만 클라이언트에 전달 (토큰 없이)
-                res.json({ 
-                    success: true, 
+                res.json({
+                    success: true,
                     message: '1단계 인증 성공',
                     sessionId: sessionId
                 });
@@ -518,21 +521,21 @@ app.post('/api/admin/login-step1', sanitizeInput, (req, res) => {
                 // 로그인 실패 - 실패 횟수 증가
                 const failedAttempts = (admin.failed_login_attempts || 0) + 1;
                 let lockedUntil = null;
-                
+
                 if (failedAttempts >= 5) {
                     lockedUntil = new Date(Date.now() + 30 * 60 * 1000);
                 }
-                
+
                 db.run(
                     'UPDATE admins SET failed_login_attempts = ?, locked_until = ? WHERE id = ?',
                     [failedAttempts, lockedUntil ? lockedUntil.toISOString() : null, admin.id]
                 );
-                
+
                 db.run(
                     'INSERT INTO admin_login_attempts (username, ip_address, success) VALUES (?, ?, ?)',
                     [username, ipAddress, 0]
                 );
-                
+
                 return res.status(401).json({ error: '잘못된 사용자명 또는 비밀번호입니다.' });
             }
         }
@@ -544,23 +547,23 @@ app.post('/api/admin/login-step2', sanitizeInput, (req, res) => {
     const { sessionId, pin } = req.body;
     const ipAddress = getClientIp(req);
     const userAgent = req.headers['user-agent'] || 'unknown';
-    
+
     if (!sessionId || !pin) {
         return res.status(400).json({ error: '인증 정보가 올바르지 않습니다.' });
     }
-    
+
     // 서버 측 세션 검증
     const session = tempAuthSessions.get(sessionId);
     if (!session) {
         return res.status(401).json({ error: '인증 세션이 만료되었거나 유효하지 않습니다. 다시 로그인해주세요.' });
     }
-    
+
     // 세션 만료 확인
     if (Date.now() - session.createdAt > SESSION_EXPIRY) {
         tempAuthSessions.delete(sessionId);
         return res.status(401).json({ error: '인증 세션이 만료되었습니다. 다시 로그인해주세요.' });
     }
-    
+
     // IP 주소 검증 (보안 강화)
     if (session.ipAddress !== ipAddress) {
         tempAuthSessions.delete(sessionId);
@@ -570,13 +573,13 @@ app.post('/api/admin/login-step2', sanitizeInput, (req, res) => {
         );
         return res.status(403).json({ error: '보안 오류: IP 주소가 일치하지 않습니다.' });
     }
-    
+
     // PIN 시도 횟수 확인
     if (session.pinAttempts >= MAX_PIN_ATTEMPTS) {
         tempAuthSessions.delete(sessionId);
         return res.status(403).json({ error: 'PIN 시도 횟수를 초과했습니다. 다시 로그인해주세요.' });
     }
-    
+
     db.get(
         'SELECT * FROM admins WHERE id = ?',
         [session.adminId],
@@ -585,7 +588,7 @@ app.post('/api/admin/login-step2', sanitizeInput, (req, res) => {
                 tempAuthSessions.delete(sessionId);
                 return res.status(500).json({ error: '서버 오류' });
             }
-            
+
             // PIN 검증
             if (!admin.pin) {
                 tempAuthSessions.delete(sessionId);
@@ -595,41 +598,41 @@ app.post('/api/admin/login-step2', sanitizeInput, (req, res) => {
                 );
                 return res.status(401).json({ error: 'PIN이 설정되지 않았습니다. 관리자에게 문의하세요.' });
             }
-            
+
             if (!bcrypt.compareSync(pin, admin.pin)) {
                 // PIN 오류 - 세션 내 시도 횟수 증가
                 session.pinAttempts += 1;
-                
+
                 // 계정 전체 실패 횟수도 증가
                 const failedAttempts = (admin.failed_login_attempts || 0) + 1;
                 let lockedUntil = null;
-                
+
                 if (failedAttempts >= 5) {
                     lockedUntil = new Date(Date.now() + 30 * 60 * 1000);
                     tempAuthSessions.delete(sessionId); // 계정 잠금 시 세션 삭제
                 }
-                
+
                 db.run(
                     'UPDATE admins SET failed_login_attempts = ?, locked_until = ? WHERE id = ?',
                     [failedAttempts, lockedUntil ? lockedUntil.toISOString() : null, admin.id]
                 );
-                
+
                 db.run(
                     'INSERT INTO admin_login_attempts (username, ip_address, success) VALUES (?, ?, ?)',
                     [admin.username, ipAddress, 0]
                 );
-                
+
                 if (session.pinAttempts >= MAX_PIN_ATTEMPTS) {
                     tempAuthSessions.delete(sessionId);
                     return res.status(401).json({ error: `PIN 시도 횟수를 초과했습니다 (${MAX_PIN_ATTEMPTS}회). 다시 로그인해주세요.` });
                 }
-                
+
                 return res.status(401).json({ error: `PIN이 올바르지 않습니다. (${session.pinAttempts}/${MAX_PIN_ATTEMPTS}회 시도)` });
             }
-            
+
             // PIN 검증 성공 - 세션 삭제
             tempAuthSessions.delete(sessionId);
-            
+
             // 최종 토큰 발급 (고유 ID 포함)
             const tokenId = require('crypto').randomBytes(32).toString('hex');
             const token = jwt.sign(
@@ -637,25 +640,25 @@ app.post('/api/admin/login-step2', sanitizeInput, (req, res) => {
                 JWT_ADMIN_SECRET,
                 { expiresIn: '4h' }
             );
-            
+
             // 기존 세션 무효화 및 새 세션 저장 (동시 로그인 방지)
             db.run(
                 'UPDATE admins SET failed_login_attempts = 0, locked_until = NULL, last_login_at = CURRENT_TIMESTAMP, current_session_token = ? WHERE id = ?',
                 [token, admin.id]
             );
-            
+
             db.run(
                 'INSERT INTO admin_login_attempts (username, ip_address, success) VALUES (?, ?, ?)',
                 [admin.username, ipAddress, 1]
             );
-            
+
             db.run(
                 'INSERT INTO admin_activity_logs (admin_id, action, ip_address, user_agent, details) VALUES (?, ?, ?, ?, ?)',
                 [admin.id, 'login', ipAddress, userAgent, `관리자 로그인 성공 (PIN 인증) - IP: ${ipAddress}`]
             );
-            
-            res.json({ 
-                success: true, 
+
+            res.json({
+                success: true,
                 message: '로그인 성공',
                 token: token,
                 admin: { id: admin.id, username: admin.username }
@@ -667,7 +670,7 @@ app.post('/api/admin/login-step2', sanitizeInput, (req, res) => {
 // 관리자 로그아웃 API
 app.post('/api/admin/logout', authenticateAdmin, (req, res) => {
     const adminId = req.admin.id;
-    
+
     // 세션 토큰 초기화
     db.run(
         'UPDATE admins SET current_session_token = NULL WHERE id = ?',
@@ -676,7 +679,7 @@ app.post('/api/admin/logout', authenticateAdmin, (req, res) => {
             if (err) {
                 console.error('로그아웃 처리 오류:', err);
             }
-            
+
             // 로그아웃 활동 로깅
             const ipAddress = getClientIp(req);
             const userAgent = req.headers['user-agent'] || 'unknown';
@@ -684,7 +687,7 @@ app.post('/api/admin/logout', authenticateAdmin, (req, res) => {
                 'INSERT INTO admin_activity_logs (admin_id, action, ip_address, user_agent, details) VALUES (?, ?, ?, ?, ?)',
                 [adminId, 'logout', ipAddress, userAgent, '관리자 로그아웃']
             );
-            
+
             res.json({ success: true, message: '로그아웃되었습니다.' });
         }
     );
@@ -696,25 +699,25 @@ app.post('/api/admin/change-password', authenticateAdmin, sanitizeInput, (req, r
     const adminId = req.admin.id;
     const ipAddress = getClientIp(req);
     const userAgent = req.headers['user-agent'] || 'unknown';
-    
+
     if (!currentPassword || !newPassword || !confirmPassword) {
         return res.status(400).json({ error: '모든 필드를 입력해주세요.' });
     }
-    
+
     if (newPassword.length < 8) {
         return res.status(400).json({ error: '새 비밀번호는 최소 8자 이상이어야 합니다.' });
     }
-    
+
     if (newPassword !== confirmPassword) {
         return res.status(400).json({ error: '새 비밀번호가 일치하지 않습니다.' });
     }
-    
+
     // 현재 비밀번호 확인
     db.get('SELECT * FROM admins WHERE id = ?', [adminId], (err, admin) => {
         if (err || !admin) {
             return res.status(500).json({ error: '서버 오류' });
         }
-        
+
         if (!bcrypt.compareSync(currentPassword, admin.password)) {
             db.run(
                 'INSERT INTO admin_activity_logs (admin_id, action, ip_address, user_agent, details) VALUES (?, ?, ?, ?, ?)',
@@ -722,10 +725,10 @@ app.post('/api/admin/change-password', authenticateAdmin, sanitizeInput, (req, r
             );
             return res.status(401).json({ error: '현재 비밀번호가 올바르지 않습니다.' });
         }
-        
+
         // 새 비밀번호 해시화
         const hashedPassword = bcrypt.hashSync(newPassword, 10);
-        
+
         // 비밀번호 업데이트
         db.run(
             'UPDATE admins SET password = ? WHERE id = ?',
@@ -734,13 +737,13 @@ app.post('/api/admin/change-password', authenticateAdmin, sanitizeInput, (req, r
                 if (err) {
                     return res.status(500).json({ error: '비밀번호 변경 중 오류가 발생했습니다.' });
                 }
-                
+
                 // 활동 로깅
                 db.run(
                     'INSERT INTO admin_activity_logs (admin_id, action, ip_address, user_agent, details) VALUES (?, ?, ?, ?, ?)',
                     [adminId, 'change_password', ipAddress, userAgent, '비밀번호 변경 성공']
                 );
-                
+
                 res.json({ success: true, message: '비밀번호가 성공적으로 변경되었습니다.' });
             }
         );
@@ -753,21 +756,21 @@ app.post('/api/admin/change-username', authenticateAdmin, sanitizeInput, (req, r
     const adminId = req.admin.id;
     const ipAddress = getClientIp(req);
     const userAgent = req.headers['user-agent'] || 'unknown';
-    
+
     if (!currentPassword || !newUsername) {
         return res.status(400).json({ error: '모든 필드를 입력해주세요.' });
     }
-    
+
     if (newUsername.length < 3 || newUsername.length > 20) {
         return res.status(400).json({ error: '사용자명은 3~20자 사이여야 합니다.' });
     }
-    
+
     // 현재 비밀번호 확인
     db.get('SELECT * FROM admins WHERE id = ?', [adminId], (err, admin) => {
         if (err || !admin) {
             return res.status(500).json({ error: '서버 오류' });
         }
-        
+
         if (!bcrypt.compareSync(currentPassword, admin.password)) {
             db.run(
                 'INSERT INTO admin_activity_logs (admin_id, action, ip_address, user_agent, details) VALUES (?, ?, ?, ?, ?)',
@@ -775,17 +778,17 @@ app.post('/api/admin/change-username', authenticateAdmin, sanitizeInput, (req, r
             );
             return res.status(401).json({ error: '현재 비밀번호가 올바르지 않습니다.' });
         }
-        
+
         // 사용자명 중복 확인
         db.get('SELECT * FROM admins WHERE username = ? AND id != ?', [newUsername, adminId], (err, existingAdmin) => {
             if (err) {
                 return res.status(500).json({ error: '서버 오류' });
             }
-            
+
             if (existingAdmin) {
                 return res.status(400).json({ error: '이미 사용 중인 사용자명입니다.' });
             }
-            
+
             // 사용자명 업데이트
             db.run(
                 'UPDATE admins SET username = ? WHERE id = ?',
@@ -797,15 +800,15 @@ app.post('/api/admin/change-username', authenticateAdmin, sanitizeInput, (req, r
                         }
                         return res.status(500).json({ error: '사용자명 변경 중 오류가 발생했습니다.' });
                     }
-                    
+
                     // 활동 로깅
                     db.run(
                         'INSERT INTO admin_activity_logs (admin_id, action, ip_address, user_agent, details) VALUES (?, ?, ?, ?, ?)',
                         [adminId, 'change_username', ipAddress, userAgent, `사용자명 변경: ${admin.username} → ${newUsername}`]
                     );
-                    
-                    res.json({ 
-                        success: true, 
+
+                    res.json({
+                        success: true,
                         message: '사용자명이 성공적으로 변경되었습니다. 다시 로그인해주세요.',
                         newUsername: newUsername
                     });
@@ -821,34 +824,34 @@ app.post('/api/admin/change-pin', authenticateAdmin, sanitizeInput, (req, res) =
     const adminId = req.admin.id;
     const ipAddress = getClientIp(req);
     const userAgent = req.headers['user-agent'] || 'unknown';
-    
+
     if (!currentPin || !newPin || !confirmNewPin) {
         return res.status(400).json({ error: '모든 필드를 입력해주세요.' });
     }
-    
+
     // PIN 형식 검증
     if (!/^\d+$/.test(currentPin) || !/^\d+$/.test(newPin) || !/^\d+$/.test(confirmNewPin)) {
         return res.status(400).json({ error: 'PIN은 숫자만 입력 가능합니다.' });
     }
-    
+
     if (newPin.length < 4 || newPin.length > 6) {
         return res.status(400).json({ error: '새 PIN은 4~6자리 숫자여야 합니다.' });
     }
-    
+
     if (newPin !== confirmNewPin) {
         return res.status(400).json({ error: '새 PIN이 일치하지 않습니다.' });
     }
-    
+
     // 현재 PIN 확인
     db.get('SELECT * FROM admins WHERE id = ?', [adminId], (err, admin) => {
         if (err || !admin) {
             return res.status(500).json({ error: '서버 오류' });
         }
-        
+
         if (!admin.pin) {
             return res.status(400).json({ error: 'PIN이 설정되지 않았습니다.' });
         }
-        
+
         if (!bcrypt.compareSync(currentPin, admin.pin)) {
             db.run(
                 'INSERT INTO admin_activity_logs (admin_id, action, ip_address, user_agent, details) VALUES (?, ?, ?, ?, ?)',
@@ -856,10 +859,10 @@ app.post('/api/admin/change-pin', authenticateAdmin, sanitizeInput, (req, res) =
             );
             return res.status(401).json({ error: '현재 PIN이 올바르지 않습니다.' });
         }
-        
+
         // 새 PIN 해시화
         const hashedPin = bcrypt.hashSync(newPin, 10);
-        
+
         // PIN 업데이트
         db.run(
             'UPDATE admins SET pin = ? WHERE id = ?',
@@ -868,13 +871,13 @@ app.post('/api/admin/change-pin', authenticateAdmin, sanitizeInput, (req, res) =
                 if (err) {
                     return res.status(500).json({ error: 'PIN 변경 중 오류가 발생했습니다.' });
                 }
-                
+
                 // 활동 로깅
                 db.run(
                     'INSERT INTO admin_activity_logs (admin_id, action, ip_address, user_agent, details) VALUES (?, ?, ?, ?, ?)',
                     [adminId, 'change_pin', ipAddress, userAgent, 'PIN 변경 성공']
                 );
-                
+
                 res.json({ success: true, message: 'PIN이 성공적으로 변경되었습니다.' });
             }
         );
@@ -889,28 +892,28 @@ app.post('/api/admin/login', sanitizeInput, (req, res) => {
 // 사용자 회원가입 API
 app.post('/api/users/register', sanitizeInput, (req, res) => {
     const { email, username, password, fullName, grade, className, studentNumber } = req.body;
-    
+
     // 입력값 검증
     if (!email || !username || !password || !fullName || !grade || !className || !studentNumber) {
         return res.status(400).json({ error: '모든 필드를 입력해주세요.' });
     }
-    
+
     if (!validator.isEmail(email)) {
         return res.status(400).json({ error: '유효한 이메일 주소를 입력해주세요.' });
     }
-    
+
     // 아이디 검증 (3~20자, 영문, 숫자, 언더스코어, 하이픈만 허용)
     if (!/^[a-zA-Z0-9_-]{3,20}$/.test(username)) {
         return res.status(400).json({ error: '아이디는 3~20자의 영문, 숫자, _, - 만 사용 가능합니다.' });
     }
-    
+
     if (password.length < 8) {
         return res.status(400).json({ error: '비밀번호는 최소 8자 이상이어야 합니다.' });
     }
-    
+
     // 비밀번호 해시화
     const hashedPassword = bcrypt.hashSync(password, 10);
-    
+
     // 회원가입 시 보안 정보 수집
     const ipAddress = getClientIp(req);
     const userAgent = req.headers['user-agent'] || 'unknown';
@@ -918,11 +921,11 @@ app.post('/api/users/register', sanitizeInput, (req, res) => {
     const acceptLanguage = req.headers['accept-language'] || 'unknown';
     const acceptEncoding = req.headers['accept-encoding'] || 'unknown';
     const acceptCharset = req.headers['accept-charset'] || 'unknown';
-    
+
     // User-Agent에서 플랫폼 및 디바이스 타입 추출
     let platform = 'unknown';
     let deviceType = 'unknown';
-    
+
     if (userAgent) {
         // 플랫폼 추출
         if (userAgent.includes('Windows')) {
@@ -936,7 +939,7 @@ app.post('/api/users/register', sanitizeInput, (req, res) => {
         } else if (userAgent.includes('iOS') || userAgent.includes('iPhone') || userAgent.includes('iPad')) {
             platform = 'iOS';
         }
-        
+
         // 디바이스 타입 추출
         if (userAgent.includes('Mobile') || userAgent.includes('Android') || userAgent.includes('iPhone') || userAgent.includes('iPad')) {
             deviceType = 'Mobile';
@@ -946,15 +949,15 @@ app.post('/api/users/register', sanitizeInput, (req, res) => {
             deviceType = 'Desktop';
         }
     }
-    
+
     db.run(
         `INSERT INTO users (email, username, password, full_name, grade, class_name, student_number, 
          signup_ip_address, signup_user_agent, signup_referer, signup_accept_language, 
          signup_accept_encoding, signup_accept_charset, signup_platform, signup_device_type)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [email, username, hashedPassword, fullName, grade, className, studentNumber,
-         ipAddress, userAgent, referer, acceptLanguage, acceptEncoding, acceptCharset, platform, deviceType],
-        function(err) {
+            ipAddress, userAgent, referer, acceptLanguage, acceptEncoding, acceptCharset, platform, deviceType],
+        function (err) {
             if (err) {
                 if (err.message.includes('UNIQUE constraint failed')) {
                     if (err.message.includes('email')) {
@@ -966,9 +969,9 @@ app.post('/api/users/register', sanitizeInput, (req, res) => {
                 }
                 return res.status(500).json({ error: '회원가입 중 오류가 발생했습니다.' });
             }
-            
-            res.json({ 
-                success: true, 
+
+            res.json({
+                success: true,
                 message: '회원가입이 완료되었습니다. 관리자 승인 후 로그인이 가능합니다.',
                 userId: this.lastID
             });
@@ -979,19 +982,19 @@ app.post('/api/users/register', sanitizeInput, (req, res) => {
 // 사용자 로그인 API
 app.post('/api/users/login', sanitizeInput, (req, res) => {
     const { login, password } = req.body; // login은 email 또는 username
-    
+
     if (!login || !password) {
         return res.status(400).json({ error: '이메일/아이디와 비밀번호를 입력해주세요.' });
     }
-    
+
     // 이메일 형식인지 확인
     const isEmail = validator.isEmail(login);
-    
+
     // 이메일이면 email로, 아니면 username으로 검색
-    const query = isEmail 
+    const query = isEmail
         ? 'SELECT * FROM users WHERE email = ?'
         : 'SELECT * FROM users WHERE username = ?';
-    
+
     db.get(
         query,
         [login],
@@ -1007,29 +1010,29 @@ app.post('/api/users/login', sanitizeInput, (req, res) => {
             if (bcrypt.compareSync(password, user.password)) {
                 // 사용자 상태 확인
                 if (user.status === 'pending') {
-                    return res.status(403).json({ 
+                    return res.status(403).json({
                         error: 'pending',
                         message: '관리자 승인 후 로그인이 가능합니다.'
                     });
                 } else if (user.status === 'rejected') {
-                    return res.status(403).json({ 
+                    return res.status(403).json({
                         error: 'rejected',
                         message: '회원가입이 거부되었습니다. 관리자에게 문의하세요.'
                     });
                 }
-                
+
                 const token = jwt.sign(
                     { id: user.id, email: user.email, role: 'user' },
                     JWT_SECRET,
                     { expiresIn: '7d' }
                 );
-                
-                res.json({ 
-                    success: true, 
+
+                res.json({
+                    success: true,
                     message: '로그인 성공',
                     token: token,
-                    user: { 
-                        id: user.id, 
+                    user: {
+                        id: user.id,
                         fullName: user.full_name,
                         email: user.email,
                         grade: user.grade,
@@ -1060,11 +1063,11 @@ app.get('/api/users', authenticateAdmin, (req, res) => {
 // 사용자 상세 정보 조회 API
 app.get('/api/users/:id', authenticateAdmin, (req, res) => {
     const userId = parseInt(req.params.id);
-    
+
     if (isNaN(userId)) {
         return res.status(400).json({ error: '유효하지 않은 사용자 ID입니다.' });
     }
-    
+
     db.get(
         `SELECT id, email, username, full_name, grade, class_name, student_number, status, 
          created_at, approved_at, signup_ip_address, signup_user_agent, signup_referer, 
@@ -1076,11 +1079,11 @@ app.get('/api/users/:id', authenticateAdmin, (req, res) => {
             if (err) {
                 return res.status(500).json({ error: '서버 오류' });
             }
-            
+
             if (!user) {
                 return res.status(404).json({ error: '사용자를 찾을 수 없습니다.' });
             }
-            
+
             res.json(user);
         }
     );
@@ -1089,7 +1092,7 @@ app.get('/api/users/:id', authenticateAdmin, (req, res) => {
 // 사용자 승인 API
 app.post('/api/users/:id/approve', authenticateAdmin, (req, res) => {
     const userId = parseInt(req.params.id);
-    
+
     if (isNaN(userId)) {
         return res.status(400).json({ error: '유효하지 않은 사용자 ID입니다.' });
     }
@@ -1097,15 +1100,15 @@ app.post('/api/users/:id/approve', authenticateAdmin, (req, res) => {
     db.run(
         'UPDATE users SET status = ?, approved_at = CURRENT_TIMESTAMP WHERE id = ?',
         ['approved', userId],
-        function(err) {
+        function (err) {
             if (err) {
                 return res.status(500).json({ error: '승인 처리 중 오류 발생' });
             }
-            
+
             if (this.changes === 0) {
                 return res.status(404).json({ error: '사용자를 찾을 수 없습니다.' });
             }
-            
+
             res.json({ success: true, message: '사용자가 승인되었습니다' });
         }
     );
@@ -1114,7 +1117,7 @@ app.post('/api/users/:id/approve', authenticateAdmin, (req, res) => {
 // 사용자 거부 API
 app.post('/api/users/:id/reject', authenticateAdmin, (req, res) => {
     const userId = parseInt(req.params.id);
-    
+
     if (isNaN(userId)) {
         return res.status(400).json({ error: '유효하지 않은 사용자 ID입니다.' });
     }
@@ -1122,15 +1125,15 @@ app.post('/api/users/:id/reject', authenticateAdmin, (req, res) => {
     db.run(
         'UPDATE users SET status = ? WHERE id = ?',
         ['rejected', userId],
-        function(err) {
+        function (err) {
             if (err) {
                 return res.status(500).json({ error: '거부 처리 중 오류 발생' });
             }
-            
+
             if (this.changes === 0) {
                 return res.status(404).json({ error: '사용자를 찾을 수 없습니다.' });
             }
-            
+
             res.json({ success: true, message: '사용자가 거부되었습니다' });
         }
     );
@@ -1152,7 +1155,7 @@ app.get('/api/applications', authenticateAdmin, (req, res) => {
 // 프로젝트 신청 승인 API
 app.post('/api/applications/:id/approve', authenticateAdmin, (req, res) => {
     const projectId = parseInt(req.params.id);
-    
+
     if (isNaN(projectId)) {
         return res.status(400).json({ error: '유효하지 않은 프로젝트 ID입니다.' });
     }
@@ -1160,17 +1163,17 @@ app.post('/api/applications/:id/approve', authenticateAdmin, (req, res) => {
     db.run(
         'UPDATE projects SET status = ?, approved_at = CURRENT_TIMESTAMP WHERE id = ?',
         ['approved', projectId],
-        function(err) {
+        function (err) {
             if (err) {
                 return res.status(500).json({ error: '승인 처리 중 오류 발생' });
             }
-            
+
             if (this.changes === 0) {
                 return res.status(404).json({ error: '프로젝트를 찾을 수 없습니다' });
             }
-            
-            res.json({ 
-                success: true, 
+
+            res.json({
+                success: true,
                 message: '프로젝트가 승인되었습니다',
                 projectId: projectId
             });
@@ -1181,7 +1184,7 @@ app.post('/api/applications/:id/approve', authenticateAdmin, (req, res) => {
 // 프로젝트 신청 거부 API
 app.post('/api/applications/:id/reject', authenticateAdmin, (req, res) => {
     const projectId = parseInt(req.params.id);
-    
+
     if (isNaN(projectId)) {
         return res.status(400).json({ error: '유효하지 않은 프로젝트 ID입니다.' });
     }
@@ -1189,15 +1192,15 @@ app.post('/api/applications/:id/reject', authenticateAdmin, (req, res) => {
     db.run(
         'UPDATE projects SET status = ? WHERE id = ?',
         ['rejected', projectId],
-        function(err) {
+        function (err) {
             if (err) {
                 return res.status(500).json({ error: '거부 처리 중 오류 발생' });
             }
-            
+
             if (this.changes === 0) {
                 return res.status(404).json({ error: '프로젝트를 찾을 수 없습니다.' });
             }
-            
+
             res.json({ success: true, message: '신청이 거부되었습니다' });
         }
     );
@@ -1219,23 +1222,23 @@ app.get('/api/projects', (req, res) => {
 // 승인된 프로젝트 조회 API (단일) - 공개
 app.get('/api/projects/:id', (req, res) => {
     const projectId = parseInt(req.params.id);
-    
+
     if (isNaN(projectId)) {
         return res.status(400).json({ error: '유효하지 않은 프로젝트 ID입니다.' });
     }
-    
+
     db.get(
-        'SELECT * FROM projects WHERE id = ? AND status = "approved"', 
-        [projectId], 
+        'SELECT * FROM projects WHERE id = ? AND status = "approved"',
+        [projectId],
         (err, project) => {
             if (err) {
                 return res.status(500).json({ error: '프로젝트 조회 중 오류 발생' });
             }
-            
+
             if (!project) {
                 return res.status(404).json({ error: '프로젝트를 찾을 수 없습니다.' });
             }
-            
+
             res.json(project);
         }
     );
@@ -1246,11 +1249,11 @@ app.put('/api/projects/:id', authenticateAdminOrUser, sanitizeInput, (req, res) 
     const projectId = parseInt(req.params.id);
     const userId = req.user?.id || req.admin?.id;
     const userRole = req.user?.role || req.admin?.role || 'user';
-    
+
     if (isNaN(projectId)) {
         return res.status(400).json({ error: '유효하지 않은 프로젝트 ID입니다.' });
     }
-    
+
     // 먼저 프로젝트 소유자 확인
     db.get(
         'SELECT user_id FROM projects WHERE id = ? AND status = "approved"',
@@ -1259,37 +1262,37 @@ app.put('/api/projects/:id', authenticateAdminOrUser, sanitizeInput, (req, res) 
             if (err) {
                 return res.status(500).json({ error: '프로젝트 조회 중 오류 발생' });
             }
-            
+
             if (!project) {
                 return res.status(404).json({ error: '프로젝트를 찾을 수 없습니다.' });
             }
-            
+
             // 관리자가 아니고 소유자도 아니면 거부
             if (userRole !== 'admin' && project.user_id !== userId) {
                 return res.status(403).json({ error: '프로젝트를 수정할 권한이 없습니다.' });
             }
-            
-            const { 
-                title, description, project_url, image_size, 
-                detail_url, detail_images, detail_description, features, tech_stack, links 
+
+            const {
+                title, description, project_url, image_size,
+                detail_url, detail_images, detail_description, features, tech_stack, links
             } = req.body;
-            
+
             db.run(
                 `UPDATE projects 
                  SET title = ?, description = ?, project_url = ?, image_size = ?,
                      detail_url = ?, detail_images = ?, detail_description = ?, features = ?, tech_stack = ?, links = ?
                  WHERE id = ? AND status = "approved"`,
-                [title, description, project_url, image_size, 
-                 detail_url, detail_images, detail_description, features, tech_stack, links, projectId],
-                function(err) {
+                [title, description, project_url, image_size,
+                    detail_url, detail_images, detail_description, features, tech_stack, links, projectId],
+                function (err) {
                     if (err) {
                         return res.status(500).json({ error: '수정 처리 중 오류 발생' });
                     }
-                    
+
                     if (this.changes === 0) {
                         return res.status(404).json({ error: '프로젝트를 찾을 수 없습니다.' });
                     }
-                    
+
                     res.json({ success: true, message: '프로젝트가 수정되었습니다' });
                 }
             );
@@ -1301,11 +1304,11 @@ app.put('/api/projects/:id', authenticateAdminOrUser, sanitizeInput, (req, res) 
 // 관리자 또는 사용자 인증 미들웨어
 function authenticateAdminOrUser(req, res, next) {
     const token = req.headers.authorization?.split(' ')[1] || req.cookies?.adminToken || req.cookies?.userToken;
-    
+
     if (!token) {
         return res.status(401).json({ error: '인증이 필요합니다.' });
     }
-    
+
     // 관리자 토큰 먼저 확인
     try {
         const decoded = jwt.verify(token, JWT_ADMIN_SECRET);
@@ -1328,7 +1331,7 @@ app.delete('/api/projects/:id', authenticateAdminOrUser, (req, res) => {
     const projectId = parseInt(req.params.id);
     const userId = req.user?.id;
     const userRole = req.user?.role || req.admin?.role || 'user';
-    
+
     if (isNaN(projectId)) {
         return res.status(400).json({ error: '유효하지 않은 프로젝트 ID입니다.' });
     }
@@ -1341,28 +1344,28 @@ app.delete('/api/projects/:id', authenticateAdminOrUser, (req, res) => {
             if (err) {
                 return res.status(500).json({ error: '프로젝트 조회 중 오류 발생' });
             }
-            
+
             if (!project) {
                 return res.status(404).json({ error: '프로젝트를 찾을 수 없습니다.' });
             }
-            
+
             // 관리자가 아니고 소유자도 아니면 거부
             if (userRole !== 'admin' && project.user_id !== userId) {
                 return res.status(403).json({ error: '프로젝트를 삭제할 권한이 없습니다.' });
             }
-            
+
             db.run(
                 'DELETE FROM projects WHERE id = ? AND status = "approved"',
                 [projectId],
-                function(err) {
+                function (err) {
                     if (err) {
                         return res.status(500).json({ error: '삭제 중 오류 발생' });
                     }
-                    
+
                     if (this.changes === 0) {
                         return res.status(404).json({ error: '프로젝트를 찾을 수 없습니다.' });
                     }
-                    
+
                     res.json({ success: true, message: '프로젝트가 삭제되었습니다' });
                 }
             );
@@ -1373,7 +1376,7 @@ app.delete('/api/projects/:id', authenticateAdminOrUser, (req, res) => {
 // 사용자 삭제 API (관리자만)
 app.delete('/api/users/:id', authenticateAdmin, (req, res) => {
     const userId = parseInt(req.params.id);
-    
+
     if (isNaN(userId)) {
         return res.status(400).json({ error: '유효하지 않은 사용자 ID입니다.' });
     }
@@ -1381,15 +1384,15 @@ app.delete('/api/users/:id', authenticateAdmin, (req, res) => {
     db.run(
         'DELETE FROM users WHERE id = ?',
         [userId],
-        function(err) {
+        function (err) {
             if (err) {
                 return res.status(500).json({ error: '사용자 삭제 중 오류 발생' });
             }
-            
+
             if (this.changes === 0) {
                 return res.status(404).json({ error: '사용자를 찾을 수 없습니다.' });
             }
-            
+
             res.json({ success: true, message: '사용자가 삭제되었습니다' });
         }
     );
@@ -1426,7 +1429,7 @@ app.get('/api/stats', authenticateAdmin, (req, res) => {
 app.get('/api/admin/activity-logs', authenticateAdmin, (req, res) => {
     const limit = parseInt(req.query.limit) || 100;
     const offset = parseInt(req.query.offset) || 0;
-    
+
     db.all(
         `SELECT 
             aal.id,
@@ -1455,7 +1458,7 @@ app.get('/api/admin/activity-logs', authenticateAdmin, (req, res) => {
 app.get('/api/admin/login-attempts', authenticateAdmin, (req, res) => {
     const limit = parseInt(req.query.limit) || 100;
     const offset = parseInt(req.query.offset) || 0;
-    
+
     db.all(
         `SELECT 
             id,
@@ -1481,7 +1484,7 @@ app.post('/api/upload', authenticateUser, upload.single('image'), (req, res) => 
     if (!req.file) {
         return res.status(400).json({ error: '이미지 파일이 필요합니다.' });
     }
-    
+
     if (!fs.existsSync(path.join(__dirname, 'public', 'uploads'))) {
         fs.mkdirSync(path.join(__dirname, 'public', 'uploads'), { recursive: true });
     }
@@ -1499,7 +1502,7 @@ app.post('/api/upload-multiple', authenticateAdminOrUser, upload.array('images',
     if (!req.files || req.files.length === 0) {
         return res.status(400).json({ error: '이미지 파일이 필요합니다.' });
     }
-    
+
     const imageUrls = req.files.map(file => `/uploads/${file.filename}`);
     res.json({
         success: true,
@@ -1511,17 +1514,17 @@ app.post('/api/upload-multiple', authenticateAdminOrUser, upload.array('images',
 
 // 프로젝트 신청 저장 API (등록 폼에서 사용, 인증된 사용자만)
 app.post('/api/applications', authenticateUser, sanitizeInput, (req, res) => {
-    const { 
-        title, description, category, applicant_name, contact, email, 
-        project_url, image_size, detail_description, 
-        features, tech_stack, links, project_images 
+    const {
+        title, description, category, applicant_name, contact, email,
+        project_url, image_size, detail_description,
+        features, tech_stack, links, project_images
     } = req.body;
-    
+
     // 입력값 검증
     if (!title || !description || !category || !contact) {
         return res.status(400).json({ error: '필수 항목을 모두 입력해주세요.' });
     }
-    
+
     // URL 검증
     if (project_url && !validator.isURL(project_url)) {
         return res.status(400).json({ error: '유효한 URL을 입력해주세요.' });
@@ -1546,17 +1549,17 @@ app.post('/api/applications', authenticateUser, sanitizeInput, (req, res) => {
           image_size, detail_description, features, tech_stack, links, project_images, user_id, status)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')`,
         [title, description, category, applicant_name, contact, email || req.user.email, project_url, mainImageUrl,
-         image_size || 'cover', detail_description || '', features || '', tech_stack || '', 
-         links || '', project_images || '', req.user.id],
-        function(err) {
+            image_size || 'cover', detail_description || '', features || '', tech_stack || '',
+            links || '', project_images || '', req.user.id],
+        function (err) {
             if (err) {
                 return res.status(500).json({ error: '신청 저장 중 오류 발생' });
             }
-            
+
             const projectId = this.lastID;
-            
-            res.json({ 
-                success: true, 
+
+            res.json({
+                success: true,
                 message: '신청이 접수되었습니다',
                 projectId: projectId
             });
