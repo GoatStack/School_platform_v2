@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  dyhs-dev:
+    build: .
+    ports:
+      - 9192:9192
+    volumes:
+      - db_data:/app/database
+      - uploads_data:/app/public/uploads
+    environment:
+      - NODE_ENV=production
+      - PORT=9192
+
+volumes:
+  db_data:
+  uploads_data:

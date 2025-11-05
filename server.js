@@ -297,7 +297,7 @@ app.get('/project-detail', (req, res) => {
 });
 
 // SQLite 데이터베이스 연결
-const dbPath = path.join(__dirname, 'database.sqlite');
+const dbPath = path.join(__dirname, 'database', 'database.sqlite');
 const db = new sqlite3.Database(dbPath);
 
 // 데이터베이스 초기화

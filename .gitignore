@@ -12,6 +12,7 @@ node_modules/
 *.db
 database.sqlite
 database.sqlite3
+database/*
 public/uploads/*
 
 # Logs
