@@ -192,43 +192,87 @@ function authenticateUser(req, res, next) {
 }
 
 // JWT 토큰 검증 미들웨어 (관리자)
-// IP 주소 가져오기 함수
+// IP 주소 가져오기 함수 (외부 IP 우선)
 function getClientIp(req) {
-    // x-forwarded-for 헤더 확인 (프록시/로드밸런서 뒤에 있을 때)
+    // 1. x-forwarded-for 헤더 확인 (프록시/로드밸런서 뒤에서 클라이언트의 실제 외부 IP)
     const forwarded = req.headers['x-forwarded-for'];
     if (forwarded) {
-        // 여러 IP가 있을 수 있으므로 첫 번째 IP 사용 (클라이언트의 실제 IP)
+        // 여러 IP가 있을 수 있으므로 첫 번째 IP 사용 (가장 원래의 클라이언트 IP)
         const clientIp = forwarded.split(',')[0].trim();
-        // IPv6를 IPv4로 변환
-        if (clientIp && clientIp.startsWith('::ffff:')) {
+        // 내부 IP가 아닌 경우만 사용 (192.168.x.x, 10.x.x.x, 172.16-31.x.x 제외)
+        if (clientIp && !isPrivateIp(clientIp)) {
+            if (clientIp.startsWith('::ffff:')) {
+                return clientIp.substring(7);
+            }
+            return clientIp;
+        }
+        // 내부 IP여도 일단 사용 (외부 IP가 없을 경우)
+        if (clientIp.startsWith('::ffff:')) {
             return clientIp.substring(7);
         }
         return clientIp;
     }
     
-    // x-real-ip 헤더 확인 (Nginx 등에서 사용)
+    // 2. x-real-ip 헤더 확인 (Nginx 등에서 사용)
     const realIp = req.headers['x-real-ip'];
     if (realIp) {
-        if (realIp.startsWith('::ffff:')) {
-            return realIp.substring(7);
+        if (!isPrivateIp(realIp)) {
+            if (realIp.startsWith('::ffff:')) {
+                return realIp.substring(7);
+            }
+            return realIp;
         }
-        return realIp;
     }
     
-    // 직접 연결인 경우
-    const ip = req.ip || req.connection?.remoteAddress || req.socket?.remoteAddress || req.headers['remote-addr'];
-    
-    // IPv6 localhost를 IPv4로 변환
-    if (ip === '::1' || ip === '::ffff:127.0.0.1') {
-        return '127.0.0.1';
+    // 3. req.ip 사용 (trust proxy 설정 시 클라이언트 IP)
+    const ip = req.ip;
+    if (ip && ip !== '::1' && ip !== '::ffff:127.0.0.1') {
+        // IPv6를 IPv4로 변환
+        let finalIp = ip;
+        if (ip.startsWith('::ffff:')) {
+            finalIp = ip.substring(7);
+        }
+        // 내부 IP가 아닌 경우 사용
+        if (!isPrivateIp(finalIp)) {
+            return finalIp;
+        }
     }
     
-    // IPv6를 IPv4로 변환 (::ffff: prefix 제거)
-    if (ip && ip.startsWith('::ffff:')) {
-        return ip.substring(7);
+    // 4. 직접 연결 시 (fallback)
+    const directIp = req.connection?.remoteAddress || req.socket?.remoteAddress;
+    if (directIp) {
+        let finalIp = directIp;
+        if (directIp === '::1' || directIp === '::ffff:127.0.0.1') {
+            return '127.0.0.1';
+        }
+        if (directIp.startsWith('::ffff:')) {
+            finalIp = directIp.substring(7);
+        }
+        return finalIp;
     }
     
-    return ip || 'unknown';
+    return 'unknown';
+}
+
+// 내부 IP 주소 확인 함수
+function isPrivateIp(ip) {
+    if (!ip) return false;
+    // IPv6 prefix 제거
+    const cleanIp = ip.replace(/^::ffff:/, '');
+    
+    // 127.0.0.1 (localhost)
+    if (cleanIp === '127.0.0.1' || cleanIp === 'localhost') return true;
+    
+    // 192.168.x.x
+    if (/^192\.168\./.test(cleanIp)) return true;
+    
+    // 10.x.x.x
+    if (/^10\./.test(cleanIp)) return true;
+    
+    // 172.16.x.x ~ 172.31.x.x
+    if (/^172\.(1[6-9]|2[0-9]|3[01])\./.test(cleanIp)) return true;
+    
+    return false;
 }
 
 // 관리자 인증 미들웨어 (보안 강화)
