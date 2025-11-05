@@ -564,20 +564,8 @@ app.post('/api/admin/login-step2', sanitizeInput, (req, res) => {
         return res.status(401).json({ error: '인증 세션이 만료되었습니다. 다시 로그인해주세요.' });
     }
 
-    // IP 주소 검증 (보안 강화)
-    // 개발 환경에서는 IP 검증을 완화 (로컬호스트인 경우)
-    const isLocalhost = ipAddress === '127.0.0.1' || ipAddress === '::1' || ipAddress === 'localhost';
-    const isSessionLocalhost = session.ipAddress === '127.0.0.1' || session.ipAddress === '::1' || session.ipAddress === 'localhost';
-    
-    // 로컬호스트인 경우 IP 검증 완화
-    if (!isLocalhost && !isSessionLocalhost && session.ipAddress !== ipAddress) {
-        tempAuthSessions.delete(sessionId);
-        db.run(
-            'INSERT INTO admin_login_attempts (username, ip_address, success) VALUES (?, ?, ?)',
-            [session.username, ipAddress, 0]
-        );
-        return res.status(403).json({ error: '보안 오류: IP 주소가 일치하지 않습니다.' });
-    }
+    // IP 주소 검증 제거 (서버 배포 환경에서 IP가 변경될 수 있으므로)
+    // IP 검증은 제거하고 세션 ID와 PIN만으로 인증 진행
 
     // PIN 시도 횟수 확인
     if (session.pinAttempts >= MAX_PIN_ATTEMPTS) {
