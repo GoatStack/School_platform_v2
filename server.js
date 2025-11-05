@@ -194,19 +194,40 @@ function authenticateUser(req, res, next) {
 // JWT 토큰 검증 미들웨어 (관리자)
 // IP 주소 가져오기 함수
 function getClientIp(req) {
+    // x-forwarded-for 헤더 확인 (프록시/로드밸런서 뒤에 있을 때)
     const forwarded = req.headers['x-forwarded-for'];
     if (forwarded) {
-        return forwarded.split(',')[0].trim();
+        // 여러 IP가 있을 수 있으므로 첫 번째 IP 사용 (클라이언트의 실제 IP)
+        const clientIp = forwarded.split(',')[0].trim();
+        // IPv6를 IPv4로 변환
+        if (clientIp && clientIp.startsWith('::ffff:')) {
+            return clientIp.substring(7);
+        }
+        return clientIp;
     }
-    const ip = req.ip || req.connection.remoteAddress || req.socket.remoteAddress;
+    
+    // x-real-ip 헤더 확인 (Nginx 등에서 사용)
+    const realIp = req.headers['x-real-ip'];
+    if (realIp) {
+        if (realIp.startsWith('::ffff:')) {
+            return realIp.substring(7);
+        }
+        return realIp;
+    }
+    
+    // 직접 연결인 경우
+    const ip = req.ip || req.connection?.remoteAddress || req.socket?.remoteAddress || req.headers['remote-addr'];
+    
     // IPv6 localhost를 IPv4로 변환
     if (ip === '::1' || ip === '::ffff:127.0.0.1') {
         return '127.0.0.1';
     }
+    
     // IPv6를 IPv4로 변환 (::ffff: prefix 제거)
     if (ip && ip.startsWith('::ffff:')) {
         return ip.substring(7);
     }
+    
     return ip || 'unknown';
 }
 
