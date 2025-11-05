@@ -565,7 +565,12 @@ app.post('/api/admin/login-step2', sanitizeInput, (req, res) => {
     }
 
     // IP 주소 검증 (보안 강화)
-    if (session.ipAddress !== ipAddress) {
+    // 개발 환경에서는 IP 검증을 완화 (로컬호스트인 경우)
+    const isLocalhost = ipAddress === '127.0.0.1' || ipAddress === '::1' || ipAddress === 'localhost';
+    const isSessionLocalhost = session.ipAddress === '127.0.0.1' || session.ipAddress === '::1' || session.ipAddress === 'localhost';
+    
+    // 로컬호스트인 경우 IP 검증 완화
+    if (!isLocalhost && !isSessionLocalhost && session.ipAddress !== ipAddress) {
         tempAuthSessions.delete(sessionId);
         db.run(
             'INSERT INTO admin_login_attempts (username, ip_address, success) VALUES (?, ?, ?)',
