@@ -17,9 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function checkLoginStatus() {
-    const isLoggedIn = localStorage.getItem('userLoggedIn') === 'true';
-    
-    if (!isLoggedIn) {
+    if (!isUserLoggedIn()) {
         alert('로그인이 필요합니다.');
         window.location.href = '/login';
         return;
@@ -35,16 +33,28 @@ function fillUserInfo() {
 
 function setupImageSelection() {
     const imageInput = document.getElementById('projectImages');
+    const fileNameDisplay = document.getElementById('fileNameDisplay');
     
     imageInput.addEventListener('change', function(e) {
         const files = Array.from(e.target.files);
         
-        if (files.length === 0) return;
+        if (files.length === 0) {
+            fileNameDisplay.textContent = '선택된 파일 없음';
+            return;
+        }
+        
+        // 파일명 표시 업데이트
+        if (files.length === 1) {
+            fileNameDisplay.textContent = files[0].name;
+        } else {
+            fileNameDisplay.textContent = `${files.length}개의 파일 선택됨`;
+        }
         
         // 최대 10장 제한
         if (files.length > 10) {
             alert('최대 10장까지만 선택할 수 있습니다.');
             imageInput.value = '';
+            fileNameDisplay.textContent = '선택된 파일 없음';
             return;
         }
         
@@ -55,6 +65,7 @@ function setupImageSelection() {
         if (oversizedFiles.length > 0) {
             alert('파일 크기는 10MB를 초과할 수 없습니다.');
             imageInput.value = '';
+            fileNameDisplay.textContent = '선택된 파일 없음';
             return;
         }
         
@@ -63,6 +74,7 @@ function setupImageSelection() {
         if (imageFiles.length !== files.length) {
             alert('이미지 파일만 선택 가능합니다.');
             imageInput.value = '';
+            fileNameDisplay.textContent = '선택된 파일 없음';
             return;
         }
         
@@ -82,8 +94,16 @@ async function uploadImage(file) {
     formData.append('image', file);
     
     try {
+        const token = getUserToken();
+        if (!token) {
+            throw new Error('인증이 필요합니다.');
+        }
+        
         const response = await fetch('/api/upload', {
             method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
             body: formData
         });
         
@@ -108,10 +128,20 @@ function updateImagePreview() {
     uploadedImages.forEach((imageUrl, index) => {
         const imageContainer = document.createElement('div');
         imageContainer.className = 'image-preview-item';
-        imageContainer.innerHTML = `
-            <img src="${imageUrl}" alt="업로드된 이미지 ${index + 1}">
-            <button type="button" class="remove-image-btn" onclick="removeImage(${index})">×</button>
-        `;
+        
+        // XSS 방지를 위해 안전하게 이미지 추가
+        const img = document.createElement('img');
+        img.src = escapeHtml(imageUrl);
+        img.alt = `업로드된 이미지 ${index + 1}`;
+        
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'remove-image-btn';
+        removeBtn.textContent = '×';
+        removeBtn.addEventListener('click', () => removeImage(index));
+        
+        imageContainer.appendChild(img);
+        imageContainer.appendChild(removeBtn);
         preview.appendChild(imageContainer);
     });
 }
@@ -171,11 +201,8 @@ function setupFormSubmission() {
 }
 
 async function saveToDatabase(data) {
-    const response = await fetch('/api/applications', {
+    const response = await authenticatedFetch('/api/applications', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
         body: JSON.stringify(data)
     });
     

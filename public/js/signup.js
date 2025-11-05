@@ -19,10 +19,10 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (password === confirmPassword) {
             passwordStatus.textContent = '일치합니다';
-            passwordStatus.className = 'password-status match';
+            passwordStatus.className = 'password-status success';
         } else {
             passwordStatus.textContent = '비밀번호가 일치하지 않습니다';
-            passwordStatus.className = 'password-status mismatch';
+            passwordStatus.className = 'password-status error';
         }
     }
     
@@ -44,8 +44,17 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // 폼 데이터 수집
         const formData = new FormData(signupForm);
+        const username = formData.get('username')?.trim() || '';
+        
+        // 아이디 검증
+        if (!username || !/^[a-zA-Z0-9_-]{3,20}$/.test(username)) {
+            alert('아이디는 3~20자의 영문, 숫자, _, - 만 사용 가능합니다.');
+            return;
+        }
+        
         const data = {
             email: formData.get('email'),
+            username: username,
             password: formData.get('password'),
             fullName: formData.get('fullName'),
             grade: formData.get('grade'),
@@ -75,14 +84,29 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('서버 연결에 실패했습니다.');
         }
     });
+
+    // 모달 닫기 버튼 이벤트 리스너
+    const closePendingBtn = document.getElementById('closePendingModalBtn');
+    
+    if (closePendingBtn) {
+        closePendingBtn.addEventListener('click', closePendingModal);
+    }
 });
 
 function showPendingModal() {
-    document.getElementById('pendingModal').style.display = 'flex';
+    const modal = document.getElementById('pendingModal');
+    if (modal) {
+        modal.classList.add('modal-show');
+        modal.style.display = 'flex';
+    }
 }
 
 function closePendingModal() {
-    document.getElementById('pendingModal').style.display = 'none';
+    const modal = document.getElementById('pendingModal');
+    if (modal) {
+        modal.classList.remove('modal-show');
+        modal.style.display = 'none';
+    }
     // 메인 페이지로 이동
     window.location.href = '/';
 }

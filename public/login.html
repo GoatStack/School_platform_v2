@@ -3,40 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>로그인 - Make;-Dev</title>
+    <title>로그인</title>
     <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/register.css">
+    <link rel="stylesheet" href="css/login.css">
 </head>
 <body>
     <header class="header">
         <div class="header-container">
             <h1 class="logo">DEV</h1>
-            <a href="/" class="back-btn">← 메인으로</a>
+            <div class="auth-nav">
+                <button class="theme-toggle" id="themeToggle" aria-label="테마 전환">
+                    <span id="themeIcon">☽</span>
+                </button>
+                <a href="/" class="back-btn">← 메인으로</a>
+            </div>
         </div>
     </header>
 
     <main class="main-content">
         <section class="register-section">
             <div class="register-container">
-                <h2>로그인</h2>
-                <p class="register-description">덕영고등학교 소프트웨어과 학생 로그인</p>
-                
-                <form id="loginForm" class="register-form">
-                    <div class="form-group">
-                        <label for="email">이메일</label>
-                        <input type="email" id="email" name="email" required placeholder="이메일을 입력하세요">
-                    </div>
+                <div class="login-form-wrapper">
+                    <h2 class="login-title">로그인</h2>
+                    <p class="login-subtitle">덕영고등학교 Make-DEV 서비스</p>
                     
-                    <div class="form-group">
-                        <label for="password">비밀번호</label>
-                        <input type="password" id="password" name="password" required placeholder="비밀번호를 입력하세요">
-                    </div>
+                    <form id="loginForm" class="login-form-simple">
+                        <input type="text" id="login" name="login" required placeholder="이메일 또는 아이디를 입력하세요" class="login-input" autocomplete="username">
+                        <input type="password" id="password" name="password" required placeholder="비밀번호를 입력하세요" class="login-input" autocomplete="current-password">
+                        
+                        <button type="submit" class="login-submit-btn">로그인</button>
+                    </form>
                     
-                    <button type="submit" class="register-btn">로그인</button>
-                </form>
-                
-                <div class="login-link">
-                    <p>계정이 없으신가요? <a href="/signup" class="signup-link">회원가입하기</a></p>
+                    <div class="login-link">
+                        <p>계정이 없으신가요? <a href="/signup" class="signup-link">회원가입하기</a></p>
+                    </div>
                 </div>
             </div>
         </section>
@@ -54,7 +54,7 @@
                 <p>문의사항이 있으시면 관리자에게 연락하세요.</p>
             </div>
             <div class="modal-actions">
-                <button onclick="closePendingModal()" class="btn-primary">확인</button>
+                <button id="closePendingModalBtn" class="btn-primary">확인</button>
             </div>
         </div>
     </div>
@@ -70,11 +70,13 @@
                 <p>관리자에게 문의하세요.</p>
             </div>
             <div class="modal-actions">
-                <button onclick="closeRejectedModal()" class="btn-primary">확인</button>
+                <button id="closeRejectedModalBtn" class="btn-primary">확인</button>
             </div>
         </div>
     </div>
 
+    <script src="js/theme.js"></script>
+    <script src="js/auth.js"></script>
     <script src="js/login.js"></script>
 </body>
 </html>

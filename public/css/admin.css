@@ -1,5 +1,45 @@
 /* 관리자 페이지 전용 스타일 */
 
+html {
+    background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+    background-attachment: fixed;
+    height: 100%;
+    min-height: 100%;
+}
+
+body {
+    padding-top: 0;
+    padding-bottom: 0;
+    background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+    background-attachment: fixed;
+    background-size: cover;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: relative;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+    z-index: -1;
+    pointer-events: none;
+}
+
+main.main-content {
+    background: transparent;
+    position: relative;
+    min-height: 100vh;
+}
+
 /* 사이드바 토글 버튼 */
 .sidebar-toggle {
     position: fixed;
@@ -7,35 +47,76 @@
     left: 0;
     transform: translateY(-50%);
     z-index: 1000;
-    background: #4A90E2;
-    color: white;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border: none;
-    padding: 15px 8px;
-    border-radius: 0 8px 8px 0;
+    padding: 16px 12px;
+    border-radius: 0 12px 12px 0;
     cursor: pointer;
-    font-size: 18px;
+    transition: all 0.3s ease, opacity 0.3s ease;
+    box-shadow: 2px 0 15px rgba(102, 126, 234, 0.4);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    width: 50px;
+    min-height: 60px;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.sidebar-toggle .toggle-icon {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    width: 24px;
+    height: 18px;
+    position: relative;
+}
+
+.sidebar-toggle .toggle-icon span {
+    display: block;
+    width: 100%;
+    height: 3px;
+    background: #ffffff;
+    border-radius: 3px;
     transition: all 0.3s ease;
-    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
-    writing-mode: vertical-rl;
-    text-orientation: mixed;
+    transform-origin: center;
 }
 
 .sidebar-toggle:hover {
-    background: #357ABD;
-    transform: translateY(-50%) translateX(2px);
-    box-shadow: 4px 0 15px rgba(0, 0, 0, 0.4);
+    transform: translateY(-50%) translateX(3px);
+    box-shadow: 4px 0 20px rgba(102, 126, 234, 0.6);
+}
+
+.sidebar-toggle:hover .toggle-icon span {
+    background: #ffffff;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
 }
 
 .sidebar-toggle.sidebar-open {
     left: 250px;
     transform: translateY(-50%);
-    border-radius: 8px 0 0 8px;
-    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.3);
+    border-radius: 12px 0 0 12px;
+    box-shadow: -2px 0 15px rgba(102, 126, 234, 0.4);
 }
 
 .sidebar-toggle.sidebar-open:hover {
-    transform: translateY(-50%) translateX(-2px);
-    box-shadow: -4px 0 15px rgba(0, 0, 0, 0.4);
+    transform: translateY(-50%) translateX(-3px);
+    box-shadow: -4px 0 20px rgba(102, 126, 234, 0.6);
+}
+
+.sidebar-toggle.sidebar-open .toggle-icon span:nth-child(1) {
+    transform: translateY(8px) rotate(45deg);
+}
+
+.sidebar-toggle.sidebar-open .toggle-icon span:nth-child(2) {
+    opacity: 0;
+    transform: scaleX(0);
+}
+
+.sidebar-toggle.sidebar-open .toggle-icon span:nth-child(3) {
+    transform: translateY(-8px) rotate(-45deg);
 }
 
 /* 사이드바 오버레이 */
@@ -60,16 +141,16 @@
 /* 사이드바 스타일 */
 .admin-sidebar {
     width: 250px;
-    background: #2c2c2c;
+    background: #0f0f23;
     padding: 20px 0;
     height: 100vh;
     position: fixed;
     left: -250px;
     top: 0;
     z-index: 999;
-    border-right: 1px solid #404040;
+    border-right: 1px solid #1a1a2e;
     transition: left 0.3s ease;
-    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
     overflow-y: auto;
 }
 
@@ -79,7 +160,7 @@
 
 .sidebar-header {
     padding: 0 20px 20px;
-    border-bottom: 1px solid #404040;
+    border-bottom: 1px solid #1a1a2e;
     margin-bottom: 20px;
     display: flex;
     justify-content: space-between;
@@ -87,10 +168,14 @@
 }
 
 .sidebar-header h3 {
-    color: #e0e0e0;
+    color: #ffffff;
     font-size: 18px;
-    font-weight: 600;
+    font-weight: 700;
     margin: 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .sidebar-close {
@@ -123,7 +208,7 @@
 .nav-item {
     background: none;
     border: none;
-    color: #b0b0b0;
+    color: #9a9aaf;
     padding: 12px 20px;
     text-align: left;
     cursor: pointer;
@@ -133,16 +218,38 @@
     gap: 10px;
     font-size: 14px;
     font-weight: 500;
+    width: 100%;
+    font-family: inherit;
 }
 
 .nav-item:hover {
-    background: rgba(74, 144, 226, 0.1);
-    color: #e0e0e0;
+    background: rgba(102, 126, 234, 0.1);
+    color: #ffffff;
 }
 
 .nav-item.active {
-    background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
+}
+
+.nav-item.nav-link {
+    text-decoration: none;
+    color: #9a9aaf;
+}
+
+.nav-item.nav-link:hover {
+    background: rgba(102, 126, 234, 0.1);
+    color: #ffffff;
+}
+
+.nav-item.logout-nav-item:hover {
+    background: rgba(255, 107, 107, 0.1);
+}
+
+.sidebar-divider {
+    height: 1px;
+    background: #1a1a2e;
+    margin: 10px 0;
 }
 
 .nav-icon {
@@ -152,10 +259,10 @@
 /* 메인 콘텐츠 영역 */
 .admin-content {
     flex: 1;
-    background: #2c2c2c;
-    border-radius: 12px;
+    background: transparent;
+    border-radius: 0;
     padding: 30px;
-    margin-top: 20px;
+    margin-top: 0;
     min-height: calc(100vh - 100px);
 }
 
@@ -173,12 +280,12 @@
     align-items: center;
     margin-bottom: 30px;
     padding-bottom: 20px;
-    border-bottom: 1px solid #404040;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .section-header h2 {
-    color: #e0e0e0;
-    font-size: 24px;
+    color: #ffffff;
+    font-size: 28px;
     font-weight: 700;
     margin: 0;
 }
@@ -189,11 +296,11 @@
 }
 
 .tab-btn {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid #404040;
-    color: #b0b0b0;
-    padding: 8px 16px;
-    border-radius: 6px;
+    background: #2a2a3e;
+    border: 1px solid #3a3a4e;
+    color: #9a9aaf;
+    padding: 10px 20px;
+    border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
     font-size: 14px;
@@ -201,12 +308,13 @@
 }
 
 .tab-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
-    color: #e0e0e0;
+    background: #34344a;
+    color: #ffffff;
+    border-color: #4a4a5e;
 }
 
 .tab-btn.active {
-    background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     border-color: transparent;
 }
@@ -297,79 +405,128 @@
 
 .admin-section {
     padding: 60px 0;
-    min-height: calc(100vh - 200px);
+    min-height: 100vh;
+    background: transparent;
+    position: relative;
+}
+
+.admin-section::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+    z-index: -2;
 }
 
 .admin-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 0 20px;
+    padding: 0 30px;
 }
 
 .admin-container h2 {
-    font-size: 32px;
-    font-weight: 700;
-    color: #e0e0e0;
+    font-size: 36px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     text-align: center;
-    margin-bottom: 40px;
+    margin-bottom: 50px;
+    letter-spacing: 2px;
 }
 
 /* 로그인 폼 */
 .login-form {
-    max-width: 400px;
+    max-width: 450px;
     margin: 0 auto;
-    background: #2c2c2c;
-    padding: 40px;
-    border-radius: 16px;
-    border: 1px solid #444;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    background: transparent;
+    padding: 0;
+    border: none;
+    box-shadow: none;
 }
 
 .login-form h3 {
-    font-size: 24px;
+    font-size: 28px;
     font-weight: 700;
-    color: #e0e0e0;
+    color: #ffffff;
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 40px;
 }
 
 .login-form .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 25px;
 }
 
 .login-form .form-group label {
     display: block;
     font-size: 14px;
     font-weight: 600;
-    color: #e0e0e0;
-    margin-bottom: 8px;
+    color: #ffffff;
+    margin-bottom: 10px;
 }
 
 .login-form .form-group input {
     width: 100%;
-    padding: 12px 16px;
-    border: 1px solid #555;
+    padding: 14px 18px;
+    border: 1px solid #3a3a4e;
     border-radius: 8px;
-    background: #1a1a1a;
-    color: #e0e0e0;
-    font-size: 14px;
+    background: #1f1f35;
+    color: #ffffff;
+    font-size: 15px;
     transition: all 0.3s ease;
     box-sizing: border-box;
+    font-family: inherit;
+    outline: none;
 }
 
 .login-form .form-group input:focus {
-    outline: none;
-    border-color: #4A90E2;
-    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+    border-color: #667eea;
+    background: #252545;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    transform: translateY(-1px);
+}
+
+.login-form .form-group input:hover {
+    border-color: #4a4a5e;
+    background: #252545;
 }
 
 .login-form .form-group input::placeholder {
-    color: #666;
+    color: #7a7a8a;
+    font-size: 15px;
 }
+
+.login-form .form-group small {
+    color: #9a9aaf;
+    font-size: 12px;
+    margin-top: 5px;
+    display: block;
+}
+
+.login-form .form-group input[type="password"][inputmode="numeric"] {
+    letter-spacing: 2px;
+    font-family: 'Courier New', monospace;
+}
+
+.login-form p {
+    color: #9a9aaf;
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+body.light-mode .login-form p {
+    color: #6c757d;
+}
+
 
 .login-btn {
     width: 100%;
-    background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     border: none;
     padding: 16px;
@@ -378,13 +535,12 @@
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 2px 10px rgba(74, 144, 226, 0.3);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
 }
 
 .login-btn:hover {
-    background: linear-gradient(135deg, #357ABD 0%, #2E6BA8 100%);
     transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(74, 144, 226, 0.4);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
 }
 
 /* 관리자 대시보드 */
@@ -396,17 +552,23 @@
 }
 
 .stat-card {
-    background: #2c2c2c;
+    background: rgba(255, 255, 255, 0.05);
     padding: 30px;
-    border-radius: 16px;
-    border: 1px solid #444;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     text-align: center;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
 }
 
 .stat-card h3 {
     font-size: 16px;
-    color: #aaa;
+    color: #9a9aaf;
     margin-bottom: 10px;
     font-weight: 500;
 }
@@ -414,15 +576,18 @@
 .stat-number {
     font-size: 36px;
     font-weight: 700;
-    color: #4A90E2;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .approval-section,
 .approved-section {
-    background: #2c2c2c;
+    background: rgba(255, 255, 255, 0.05);
     padding: 30px;
-    border-radius: 16px;
-    border: 1px solid #444;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     margin-bottom: 30px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
@@ -431,9 +596,9 @@
 .approved-section h3 {
     font-size: 24px;
     font-weight: 700;
-    color: #e0e0e0;
+    color: #ffffff;
     margin-bottom: 20px;
-    border-bottom: 2px solid #444;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     padding-bottom: 10px;
 }
 
@@ -444,19 +609,45 @@
     gap: 20px;
 }
 
+/* 터미널 스타일 로그 */
+.log-terminal {
+    background: #000000;
+    color: #ffffff;
+    font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+    font-size: 13px;
+    line-height: 1.8;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    margin: 0;
+}
+
+#activityLogsList .log-terminal,
+#loginAttemptsList .log-terminal {
+    background: #000000;
+    color: #ffffff;
+    min-height: 400px;
+    max-height: 600px;
+    overflow-y: auto;
+}
+
 .application-card,
 .project-card {
-    background: #1a1a1a;
+    background: rgba(255, 255, 255, 0.05);
     padding: 20px;
     border-radius: 12px;
-    border: 1px solid #444;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     transition: all 0.3s ease;
 }
 
 .application-card:hover,
 .project-card:hover {
-    border-color: #555;
+    border-color: rgba(102, 126, 234, 0.5);
     transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
 }
 
 .application-header {
@@ -518,7 +709,7 @@
 .application-title {
     font-size: 18px;
     font-weight: 700;
-    color: #e0e0e0;
+    color: #ffffff;
     margin: 0;
 }
 
@@ -564,8 +755,12 @@
 
 .info-value {
     font-size: 14px;
-    color: #e0e0e0;
+    color: #ffffff;
     font-weight: 500;
+}
+
+.info-label {
+    color: #9a9aaf;
 }
 
 .application-actions {
@@ -578,8 +773,8 @@
     background: #4CAF50;
     color: white;
     border: none;
-    padding: 8px 16px;
-    border-radius: 6px;
+    padding: 10px 20px;
+    border-radius: 8px;
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
@@ -588,15 +783,16 @@
 
 .btn-approve:hover {
     background: #45a049;
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
 }
 
 .btn-reject {
     background: #f44336;
     color: white;
     border: none;
-    padding: 8px 16px;
-    border-radius: 6px;
+    padding: 10px 20px;
+    border-radius: 8px;
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
@@ -605,7 +801,8 @@
 
 .btn-reject:hover {
     background: #da190b;
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(244, 67, 54, 0.4);
 }
 
 .btn-delete {
@@ -627,38 +824,41 @@
 }
 
 .btn-edit {
-    background: #4A90E2;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     border: none;
-    padding: 6px 12px;
-    border-radius: 6px;
-    font-size: 12px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
     margin-right: 10px;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
 }
 
 .btn-edit:hover {
-    background: #357ABD;
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
 }
 
 .btn-delete {
     background: #ff6b6b;
     color: white;
     border: none;
-    padding: 6px 12px;
-    border-radius: 6px;
-    font-size: 12px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
 }
 
 .btn-delete:hover {
     background: #ff5252;
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
 }
 
 .empty-state {
@@ -683,12 +883,12 @@
 }
 
 .modal-content {
-    background: #2c2c2c;
-    border: 1px solid #444;
+    background: #0f0f23;
+    border: 1px solid #1a1a2e;
     border-radius: 16px;
     padding: 0;
     width: 90%;
-    max-width: 500px;
+    max-width: 900px;
     max-height: 90vh;
     overflow-y: auto;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
@@ -699,13 +899,13 @@
     justify-content: space-between;
     align-items: center;
     padding: 20px 30px;
-    border-bottom: 1px solid #444;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .modal-header h3 {
     font-size: 20px;
     font-weight: 700;
-    color: #e0e0e0;
+    color: #ffffff;
     margin: 0;
 }
 
@@ -733,7 +933,7 @@
     display: block;
     font-size: 14px;
     font-weight: 600;
-    color: #e0e0e0;
+    color: #ffffff;
     margin-bottom: 8px;
 }
 
@@ -741,22 +941,25 @@
 #editProjectForm textarea,
 #editProjectForm select {
     width: 100%;
-    padding: 12px 16px;
-    border: 1px solid #555;
+    padding: 14px 18px;
+    border: 1px solid #3a3a4e;
     border-radius: 8px;
-    background: #1a1a1a;
-    color: #e0e0e0;
-    font-size: 14px;
+    background: #1f1f35;
+    color: #ffffff;
+    font-size: 15px;
     transition: all 0.3s ease;
     box-sizing: border-box;
+    font-family: inherit;
+    outline: none;
 }
 
 #editProjectForm input:focus,
 #editProjectForm textarea:focus,
 #editProjectForm select:focus {
-    outline: none;
-    border-color: #4A90E2;
-    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+    border-color: #667eea;
+    background: #252545;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    transform: translateY(-1px);
 }
 
 #editProjectForm textarea {
@@ -773,11 +976,244 @@
     border-top: 1px solid #444;
 }
 
+/* 사용자 상세 정보 모달 스타일 */
+.user-detail-modal-content {
+    max-width: 700px;
+    max-height: 85vh;
+}
+
+.user-detail-body {
+    padding: 0;
+    overflow-y: auto;
+}
+
+.user-detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 25px 30px;
+    border-bottom: 2px solid rgba(102, 126, 234, 0.2);
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+}
+
+.user-detail-name {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.user-detail-status-badge {
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.user-detail-main-info {
+    padding: 25px 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.user-detail-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.user-detail-info-row:last-child {
+    border-bottom: none;
+}
+
+.user-detail-section {
+    padding: 25px 30px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.user-detail-section-title {
+    margin: 0 0 20px 0;
+    color: #667eea;
+    font-size: 16px;
+    font-weight: 700;
+    padding-bottom: 12px;
+    border-bottom: 2px solid rgba(102, 126, 234, 0.3);
+}
+
+.user-detail-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+
+.user-detail-info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.user-detail-info-item.user-detail-info-full {
+    grid-column: 1 / -1;
+}
+
+.user-detail-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #9a9aaf;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.user-detail-value {
+    font-size: 14px;
+    color: #ffffff;
+    font-weight: 500;
+    word-break: break-word;
+}
+
+.user-detail-value.user-detail-code {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    background: rgba(102, 126, 234, 0.1);
+    padding: 10px 14px;
+    border-radius: 6px;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+.user-detail-value.user-detail-long {
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+/* 라이트 모드 */
+body.light-mode .user-detail-modal-content {
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+}
+
+body.light-mode .user-detail-header {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+    border-bottom-color: rgba(102, 126, 234, 0.2);
+}
+
+body.light-mode .user-detail-name {
+    color: #212529;
+}
+
+body.light-mode .user-detail-info-row {
+    border-bottom-color: #e9ecef;
+}
+
+body.light-mode .user-detail-section {
+    border-top-color: #e9ecef;
+}
+
+body.light-mode .user-detail-section-title {
+    color: #667eea;
+    border-bottom-color: rgba(102, 126, 234, 0.2);
+}
+
+body.light-mode .user-detail-label {
+    color: #6c757d;
+}
+
+body.light-mode .user-detail-value {
+    color: #212529;
+}
+
+body.light-mode .user-detail-value.user-detail-code {
+    background: #f8f9fa;
+    border-color: #dee2e6;
+    color: #495057;
+}
+
+/* 프로젝트 수정 모달 라이트 모드 */
+body.light-mode .modal-content {
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+body.light-mode .modal-header {
+    border-bottom-color: #e0e0e0;
+}
+
+body.light-mode .modal-header h3 {
+    color: #212529;
+}
+
+body.light-mode .close {
+    color: #6c757d;
+}
+
+body.light-mode .close:hover {
+    color: #212529;
+}
+
+body.light-mode #editProjectForm label {
+    color: #212529;
+}
+
+body.light-mode #editProjectForm input,
+body.light-mode #editProjectForm textarea,
+body.light-mode #editProjectForm select {
+    border: 1px solid #dee2e6;
+    background: #ffffff;
+    color: #212529;
+}
+
+body.light-mode #editProjectForm input::placeholder,
+body.light-mode #editProjectForm textarea::placeholder {
+    color: #adb5bd;
+}
+
+body.light-mode #editProjectForm input:focus,
+body.light-mode #editProjectForm textarea:focus,
+body.light-mode #editProjectForm select:focus {
+    border-color: #667eea;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+body.light-mode .modal-actions {
+    border-top-color: #e0e0e0;
+}
+
+body.light-mode .file-select-area {
+    border-color: #dee2e6;
+    background: #f8f9fa;
+    color: #6c757d;
+}
+
+body.light-mode .file-select-area:hover {
+    border-color: #667eea;
+    background: #ffffff;
+    color: #212529;
+}
+
+body.light-mode .preview-image-wrapper {
+    background: #f8f9fa;
+    border-color: #dee2e6;
+}
+
+.form-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
 .btn-cancel,
 .btn-save {
-    padding: 12px 24px;
+    padding: 12px 28px;
     border-radius: 8px;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -785,49 +1221,148 @@
 }
 
 .btn-cancel {
-    background: #555;
-    color: #e0e0e0;
+    background: #6c757d;
+    color: #ffffff;
 }
 
 .btn-cancel:hover {
-    background: #666;
+    background: #5a6268;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
 }
 
 .btn-save {
-    background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    box-shadow: 0 2px 8px rgba(74, 144, 226, 0.3);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
 }
 
 .btn-save:hover {
-    background: linear-gradient(135deg, #357ABD 0%, #2E6BA8 100%);
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(74, 144, 226, 0.4);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+}
+
+body.light-mode .form-actions {
+    border-top-color: #e0e0e0;
+}
+
+body.light-mode .btn-cancel {
+    background: #6c757d;
+    color: #ffffff;
+}
+
+body.light-mode .btn-cancel:hover {
+    background: #5a6268;
+}
+
+body.light-mode .btn-save {
+    background: linear-gradient(135deg, #4a90e2 0%, #667eea 100%);
+    box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
+}
+
+body.light-mode .btn-save:hover {
+    box-shadow: 0 6px 20px rgba(74, 144, 226, 0.4);
+}
+
+.btn-save:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
 }
 
 /* 이미지 업로드 스타일 */
 .image-upload-container {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 15px;
+}
+
+.file-select-area {
+    padding: 14px 18px;
+    border: 2px dashed #3a3a4e;
+    border-radius: 8px;
+    background: #1f1f35;
+    color: #9a9aaf;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    font-size: 14px;
+}
+
+.file-select-area:hover {
+    border-color: #667eea;
+    background: #252545;
+    color: #ffffff;
+}
+
+.images-preview {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.preview-image-wrapper {
+    position: relative;
+    width: 100%;
+    padding-top: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #1f1f35;
+    border: 1px solid #3a3a4e;
+}
+
+.preview-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.remove-image-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(255, 0, 0, 0.8);
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+
+.remove-image-btn:hover {
+    background: rgba(255, 0, 0, 1);
+    transform: scale(1.1);
 }
 
 .upload-btn {
-    background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     border: none;
-    padding: 8px 16px;
-    border-radius: 6px;
+    padding: 10px 20px;
+    border-radius: 8px;
     cursor: pointer;
     font-size: 14px;
     font-weight: 600;
     transition: all 0.3s ease;
     align-self: flex-start;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
 }
 
 .upload-btn:hover {
-    background: linear-gradient(135deg, #357ABD 0%, #2E6BA8 100%);
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
 }
 
 .image-preview {
@@ -842,27 +1377,6 @@
     object-fit: cover;
 }
 
-.images-preview {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 10px;
-}
-
-.images-preview img {
-    width: 80px;
-    height: 80px;
-    border-radius: 6px;
-    border: 2px solid #444;
-    object-fit: cover;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.images-preview img:hover {
-    transform: scale(1.05);
-    border-color: #4A90E2;
-}
 
 .upload-progress {
     width: 100%;
@@ -949,4 +1463,469 @@
     .stat-number {
         font-size: 28px;
     }
+}
+
+/* 테마 토글 버튼 (기본 스타일) */
+.theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #2a2a3e;
+    border: 1px solid #3a3a4e;
+    border-radius: 8px;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 0;
+    font-size: 20px;
+    z-index: 1001;
+    color: #ffffff;
+}
+
+.theme-toggle:hover {
+    background: #34344a;
+    border-color: #4a4a5e;
+    transform: scale(1.05);
+}
+
+/* 라이트 모드 스타일 */
+body.light-mode {
+    background: #f8f9fa;
+    color: #212529;
+}
+
+body.light-mode::before {
+    background: #f8f9fa;
+}
+
+html.light-mode {
+    background: #f8f9fa;
+}
+
+body.light-mode .admin-section::before {
+    background: #f8f9fa;
+}
+
+/* 테마 토글 버튼 */
+body.light-mode .theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    color: #495057;
+    z-index: 1001;
+}
+
+body.light-mode .theme-toggle:hover {
+    background: #e9ecef;
+    border-color: #ced4da;
+}
+
+/* 사이드바 토글 버튼 */
+body.light-mode .sidebar-toggle {
+    background: linear-gradient(135deg, #4a90e2 0%, #667eea 100%);
+    box-shadow: 2px 0 15px rgba(74, 144, 226, 0.3);
+}
+
+body.light-mode .sidebar-toggle:hover {
+    box-shadow: 4px 0 20px rgba(74, 144, 226, 0.4);
+}
+
+/* 사이드바 */
+body.light-mode .admin-sidebar {
+    background: #ffffff;
+    border-right: 1px solid #e9ecef;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.08);
+}
+
+body.light-mode .sidebar-header {
+    border-bottom: 1px solid #e9ecef;
+}
+
+body.light-mode .sidebar-header h3 {
+    background: linear-gradient(135deg, #4a90e2 0%, #667eea 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+body.light-mode .sidebar-close {
+    color: #6c757d;
+}
+
+body.light-mode .sidebar-close:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: #212529;
+}
+
+body.light-mode .nav-item {
+    color: #495057;
+}
+
+body.light-mode .nav-item:hover {
+    background: rgba(74, 144, 226, 0.08);
+    color: #212529;
+}
+
+body.light-mode .nav-item.active {
+    background: linear-gradient(135deg, #4a90e2 0%, #667eea 100%);
+    color: white;
+}
+
+body.light-mode .nav-item.nav-link {
+    color: #495057;
+}
+
+body.light-mode .nav-item.nav-link:hover {
+    background: rgba(74, 144, 226, 0.08);
+    color: #212529;
+}
+
+body.light-mode .sidebar-divider {
+    background: #e9ecef;
+}
+
+/* 로그인 폼 */
+body.light-mode .login-form h3 {
+    color: #212529;
+}
+
+body.light-mode .login-form .form-group label {
+    color: #212529;
+}
+
+body.light-mode .login-form .form-group input {
+    border: 1px solid #dee2e6;
+    background: #ffffff;
+    color: #212529;
+}
+
+body.light-mode .login-form .form-group input:focus {
+    border-color: #4a90e2;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+}
+
+body.light-mode .login-form .form-group input:hover {
+    border-color: #ced4da;
+    background: #ffffff;
+}
+
+body.light-mode .login-form .form-group input::placeholder {
+    color: #adb5bd;
+}
+
+body.light-mode .login-form .form-group small {
+    color: #6c757d;
+}
+
+/* 관리자 페이지의 로그인 버튼은 항상 그라데이션 유지 */
+body.light-mode .admin-section .login-btn,
+body.light-mode .admin-container .login-btn,
+body.light-mode .login-form .login-btn {
+    background: linear-gradient(135deg, #4a90e2 0%, #667eea 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
+    border: none;
+    padding: 16px;
+}
+
+body.light-mode .admin-section .login-btn:hover,
+body.light-mode .admin-container .login-btn:hover,
+body.light-mode .login-form .login-btn:hover {
+    background: linear-gradient(135deg, #357abd 0%, #5568d3 100%);
+    box-shadow: 0 6px 20px rgba(74, 144, 226, 0.4);
+    transform: translateY(-2px);
+}
+
+/* 관리자 페이지의 다른 버튼들도 라이트 모드 스타일 추가 */
+body.light-mode .btn-approve {
+    background: #4CAF50;
+    color: white;
+}
+
+body.light-mode .btn-approve:hover {
+    background: #45a049;
+}
+
+body.light-mode .btn-reject {
+    background: #f44336;
+    color: white;
+}
+
+body.light-mode .btn-reject:hover {
+    background: #da190b;
+}
+
+body.light-mode .btn-delete {
+    background: #ff6b6b;
+    color: white;
+}
+
+body.light-mode .btn-delete:hover {
+    background: #ff5252;
+}
+
+body.light-mode .btn-edit {
+    background: linear-gradient(135deg, #4a90e2 0%, #667eea 100%);
+    color: white;
+}
+
+body.light-mode .btn-edit:hover {
+    background: linear-gradient(135deg, #357abd 0%, #5568d3 100%);
+}
+
+/* 섹션 헤더 */
+body.light-mode .section-header {
+    border-bottom: 1px solid #e9ecef;
+}
+
+body.light-mode .section-header h2 {
+    color: #212529;
+}
+
+body.light-mode .tab-btn {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    color: #495057;
+}
+
+body.light-mode .tab-btn:hover {
+    background: #e9ecef;
+    color: #212529;
+    border-color: #ced4da;
+}
+
+body.light-mode .tab-btn.active {
+    background: linear-gradient(135deg, #4a90e2 0%, #667eea 100%);
+    color: white;
+    border-color: transparent;
+}
+
+/* 카드 스타일 */
+body.light-mode .stat-card {
+    background: #ffffff;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+body.light-mode .stat-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+body.light-mode .stat-card h3 {
+    color: #6c757d;
+}
+
+body.light-mode .stat-number {
+    background: linear-gradient(135deg, #4a90e2 0%, #667eea 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+body.light-mode .approval-section,
+body.light-mode .approved-section {
+    background: #ffffff;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+body.light-mode .approval-section h3,
+body.light-mode .approved-section h3 {
+    color: #212529;
+    border-bottom: 1px solid #e9ecef;
+}
+
+/* 애플리케이션 카드 */
+body.light-mode .application-card,
+body.light-mode .project-card {
+    background: #ffffff;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+body.light-mode .application-card:hover,
+body.light-mode .project-card:hover {
+    border-color: #4a90e2;
+    box-shadow: 0 4px 12px rgba(74, 144, 226, 0.12);
+}
+
+body.light-mode .application-title {
+    color: #212529;
+}
+
+body.light-mode .info-label {
+    color: #6c757d;
+}
+
+body.light-mode .info-value {
+    color: #212529;
+}
+
+body.light-mode .empty-state {
+    background: #ffffff;
+    border: 1px dashed #dee2e6;
+    color: #6c757d;
+}
+
+/* 터미널 스타일 (라이트 모드에서도 검은색 유지) */
+body.light-mode .log-terminal {
+    background: #000000;
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* 관리자 컨테이너 */
+body.light-mode .admin-container h2 {
+    background: linear-gradient(135deg, #4a90e2 0%, #667eea 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* 설정 섹션 스타일 */
+.settings-container {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    max-width: 800px;
+}
+
+.settings-card {
+    background: rgba(42, 42, 62, 0.6);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.settings-card h3 {
+    color: #ffffff;
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0 0 20px 0;
+    padding-bottom: 15px;
+    border-bottom: 2px solid rgba(102, 126, 234, 0.3);
+}
+
+.settings-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.settings-form .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.settings-form .form-group label {
+    color: #b0b0b0;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.settings-form .form-group input {
+    background: #1f1f35;
+    border: 1px solid #3a3a4e;
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: #ffffff;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+.settings-form .form-group input:focus {
+    outline: none;
+    border-color: #667eea;
+    background: #252545;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+.settings-form .form-group input::placeholder {
+    color: #7a7a8a;
+}
+
+.settings-form .form-group small {
+    color: #9a9aaf;
+    font-size: 12px;
+    margin-top: -4px;
+}
+
+.settings-form .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 14px 24px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    margin-top: 10px;
+}
+
+.settings-form .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.settings-form .btn-primary:active {
+    transform: translateY(0);
+}
+
+/* 라이트 모드 설정 스타일 */
+body.light-mode .settings-card {
+    background: #ffffff;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    backdrop-filter: none;
+}
+
+body.light-mode .settings-card h3 {
+    color: #212529;
+    border-bottom: 2px solid rgba(74, 144, 226, 0.2);
+}
+
+body.light-mode .settings-form .form-group label {
+    color: #495057;
+}
+
+body.light-mode .settings-form .form-group input {
+    background: #ffffff;
+    border: 1px solid #dee2e6;
+    color: #212529;
+}
+
+body.light-mode .settings-form .form-group input:focus {
+    border-color: #4a90e2;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+}
+
+body.light-mode .settings-form .form-group input::placeholder {
+    color: #adb5bd;
+}
+
+body.light-mode .settings-form .form-group small {
+    color: #6c757d;
+}
+
+body.light-mode .settings-form .btn-primary {
+    background: linear-gradient(135deg, #4a90e2 0%, #667eea 100%);
+    box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
+}
+
+body.light-mode .settings-form .btn-primary:hover {
+    box-shadow: 0 6px 20px rgba(74, 144, 226, 0.4);
 }

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>프로젝트 등록 신청 - SCHOOL_PLATFORM_V2</title>
+    <title>프로젝트 등록 신청</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/register.css">
 </head>
@@ -11,7 +11,12 @@
     <header class="header">
         <div class="header-container">
             <h1 class="logo">DEV</h1>
-            <a href="/" class="back-btn">← 메인으로</a>
+            <div class="auth-nav">
+                <button class="theme-toggle" id="themeToggle" aria-label="테마 전환">
+                    <span id="themeIcon">☽</span>
+                </button>
+                <a href="/" class="back-btn">← 메인으로</a>
+            </div>
         </div>
     </header>
 
@@ -19,16 +24,11 @@
         <section class="register-section">
             <div class="register-container">
                 <div class="register-content">
-                    <div class="register-intro">
-                        <h2>Welcome to School Platform V2</h2>
-                        <p class="intro-text">덕영고등학교 소프트웨어과 프로젝트 등록신청 페이지 입니다.</p>
-                        <p class="intro-text">세상에 단 하나뿐인 여러분의 아이디어를 실현하며, 실제 서비스로 발전시키는 과정을 직접 경험할 수 있습니다.
-                            이 과정을 통해 개발 실력은 물론, 기획력과 문제 해결 능력까지 한층 더 성장하는 자신을 만나보세요.</p>
-                    </div>
-                    
                     <div class="register-form-section">
-                        <h2>프로젝트 등록 신청</h2>
-                        <p class="register-description">자신의 프로젝트를 덕영고등학교에 배포해 보세요!</p>
+                        <div class="form-header">
+                            <h2>프로젝트 등록 신청</h2>
+                            <p class="register-description">프로젝트 정보를 입력하고 등록 신청을 제출하세요</p>
+                        </div>
                 
                 <form id="registerForm" class="register-form">
                     <div class="form-group">
@@ -93,7 +93,13 @@
 
                     <div class="form-group">
                         <label for="projectImages">프로젝트 이미지 (최대 10장)</label>
-                        <input type="file" id="projectImages" name="project_images" accept="image/*" multiple>
+                        <div class="file-upload-wrapper">
+                            <label for="projectImages" class="file-upload-button">
+                                파일 선택
+                            </label>
+                            <input type="file" id="projectImages" name="project_images" accept="image/*" multiple>
+                            <span class="file-name-display" id="fileNameDisplay">선택된 파일 없음</span>
+                        </div>
                         <div id="imagesPreview" class="images-preview"></div>
                     </div>
 
@@ -113,6 +119,8 @@
         </section>
     </main>
 
+    <script src="js/theme.js"></script>
+    <script src="js/auth.js"></script>
     <script src="js/register.js"></script>
 </body>
 </html>

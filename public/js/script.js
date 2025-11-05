@@ -9,24 +9,43 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function checkLoginStatus() {
-    const isLoggedIn = localStorage.getItem('userLoggedIn') === 'true';
     const userInfo = document.getElementById('userInfo');
     const guestNav = document.getElementById('guestNav');
     const userName = document.getElementById('userName');
     const logoutBtn = document.getElementById('logoutBtn');
+    const menuToggle = document.getElementById('menuToggle');
+    const dropdownMenu = document.getElementById('dropdownMenu');
     
-    if (isLoggedIn) {
+    if (isUserLoggedIn()) {
         const userData = JSON.parse(localStorage.getItem('userInfo') || '{}');
-        userName.textContent = `${userData.fullName}님`;
+        safeHtmlInsert(userName, `${userData.fullName}님`);
         userInfo.style.display = 'flex';
         guestNav.style.display = 'none';
         
+        // 햄버거 메뉴 토글
+        if (menuToggle && dropdownMenu) {
+            menuToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                menuToggle.classList.toggle('active');
+                dropdownMenu.classList.toggle('active');
+            });
+            
+            // 메뉴 외부 클릭 시 닫기
+            document.addEventListener('click', function(e) {
+                if (!userInfo.contains(e.target)) {
+                    menuToggle.classList.remove('active');
+                    dropdownMenu.classList.remove('active');
+                }
+            });
+        }
+        
         // 로그아웃 버튼 이벤트
-        logoutBtn.addEventListener('click', function() {
-            localStorage.removeItem('userLoggedIn');
-            localStorage.removeItem('userInfo');
-            location.reload();
-        });
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', function() {
+                logoutUser();
+                location.reload();
+            });
+        }
     } else {
         userInfo.style.display = 'none';
         guestNav.style.display = 'flex';
@@ -37,36 +56,32 @@ async function loadApprovedProjects() {
     try {
         const response = await fetch('/api/projects');
         const projects = await response.json();
-        
-        if (projects.length === 0) {
-            // 데이터베이스에 프로젝트가 없으면 기본 프로젝트들 표시
-            renderProjects();
-            return;
-        }
-        
-        renderProjectsFromDB(projects);
+        renderProjects(projects);
     } catch (error) {
         console.error('프로젝트 로드 오류:', error);
-        // 오류 시 기본 프로젝트들 표시
-        renderProjects();
+        renderProjects([]);
     }
 }
 
-function renderProjects() {
+function renderProjects(projects) {
     const projectsGrid = document.getElementById('projects-grid');
+    const emptyState = document.getElementById('empty-state');
+    
+    if (!projectsGrid || !emptyState) return;
+    
+    projectsGrid.innerHTML = '';
+    
+    if (projects.length === 0) {
+        projectsGrid.style.display = 'none';
+        emptyState.style.display = 'block';
+        return;
+    }
+    
+    projectsGrid.style.display = 'grid';
+    emptyState.style.display = 'none';
     
     projects.forEach(project => {
         const projectCard = createProjectCard(project);
-        projectsGrid.appendChild(projectCard);
-    });
-}
-
-function renderProjectsFromDB(projects) {
-    const projectsGrid = document.getElementById('projects-grid');
-    projectsGrid.innerHTML = ''; // 기존 내용 지우기
-    
-    projects.forEach(project => {
-        const projectCard = createProjectCardFromDB(project);
         projectsGrid.appendChild(projectCard);
     });
 }
@@ -76,101 +91,26 @@ function createProjectCard(project) {
     card.href = `/project-detail?id=${project.id}`;
     card.className = 'project-card';
     
-    const categoryColor = getCategoryColor(project.category);
-    const categoryIcon = getCategoryIcon(project.category);
+    const badge = document.createElement('div');
+    badge.className = 'project-category-badge';
+    safeHtmlInsert(badge, project.category);
     
-    card.innerHTML = `
-        <div class="project-category-badge">${project.category}</div>
-        <div class="project-content">
-            <h3 class="project-title">${project.title}</h3>
-            <p class="project-description">${project.description}</p>
-        </div>
-    `;
+    const content = document.createElement('div');
+    content.className = 'project-content';
     
-    return card;
-}
-
-function createProjectCardFromDB(project) {
-    const card = document.createElement('a');
-    card.href = `/project-detail?id=${project.id}`;
-    card.className = 'project-card';
+    const title = document.createElement('h3');
+    title.className = 'project-title';
+    safeHtmlInsert(title, project.title);
     
-    const categoryColor = getCategoryColor(project.category);
-    const categoryIcon = getCategoryIcon(project.category);
+    const description = document.createElement('p');
+    description.className = 'project-description';
+    safeHtmlInsert(description, project.description);
     
-    card.innerHTML = `
-        <div class="project-category-badge">${project.category}</div>
-        <div class="project-content">
-            <h3 class="project-title">${project.title}</h3>
-            <p class="project-description">${project.description}</p>
-        </div>
-    `;
+    content.appendChild(title);
+    content.appendChild(description);
+    card.appendChild(badge);
+    card.appendChild(content);
     
     return card;
 }
 
-function getCategoryColor(category) {
-    switch (category) {
-        case '웹':
-            return '#4A90E2';
-        case '앱':
-            return '#7ED321';
-        case '게임':
-            return '#BD10E0';
-        case '기타':
-            return '#F5A623';
-        default:
-            return '#666666';
-    }
-}
-
-function getCategoryIcon(category) {
-    switch (category) {
-        case '웹':
-            return '🌐';
-        case '앱':
-            return '📱';
-        case '게임':
-            return '🎮';
-        case '기타':
-            return '💻';
-        default:
-            return '💻';
-    }
-}
-
-// 프로젝트 추가 함수 (관리자용)
-function addNewProject() {
-    const title = prompt('프로젝트 제목을 입력하세요:');
-    if (!title) return;
-    
-    const description = prompt('프로젝트 설명을 입력하세요:');
-    if (!description) return;
-    
-    const url = prompt('프로젝트 URL을 입력하세요:');
-    if (!url) return;
-    
-    const category = prompt('카테고리를 입력하세요 (웹/앱/게임/기타):');
-    if (!category) return;
-    
-    const deadline = prompt('마감일을 입력하세요 (YYYY.MM.DD 형식):');
-    if (!deadline) return;
-    
-    const image = prompt('이미지 URL을 입력하세요 (선택사항):');
-    const imageSize = prompt('이미지 크기 조정을 입력하세요 (cover/contain/fill/scale-down/none, 기본값: cover):');
-    
-    const newProject = {
-        title: title,
-        description: description,
-        url: url,
-        category: category,
-        deadline: deadline,
-        image: image || `https://via.placeholder.com/400x200/666666/ffffff?text=${encodeURIComponent(title)}`,
-        imageSize: imageSize || 'cover'
-    };
-    
-    addProject(newProject);
-    
-    // 페이지 새로고침하여 새 프로젝트 표시
-    location.reload();
-}

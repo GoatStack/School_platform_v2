@@ -3,16 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>회원가입 - Make;-Dev</title>
+    <title>회원가입</title>
     <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/register.css">
+    <link rel="stylesheet" href="css/login.css">
 </head>
 <body>
     <header class="header">
         <div class="header-container">
             <h1 class="logo">DEV</h1>
             <div class="auth-nav">
-                <a href="/login" class="login-btn">로그인</a>
+                <button class="theme-toggle" id="themeToggle" aria-label="테마 전환">
+                    <span id="themeIcon">☽</span>
+                </button>
                 <a href="/" class="back-btn">← 메인으로</a>
             </div>
         </div>
@@ -21,56 +23,35 @@
     <main class="main-content">
         <section class="register-section">
             <div class="register-container">
-                <h2>회원가입</h2>
-                <p class="register-description">덕영고등학교 소프트웨어과 학생만 가입 가능합니다.</p>
-                
-                <form id="signupForm" class="register-form">
-                    <div class="form-group">
-                        <label for="email">이메일 *</label>
-                        <input type="email" id="email" name="email" required placeholder="이메일을 입력하세요">
-                    </div>
+                <div class="login-form-wrapper">
+                    <h2 class="login-title">회원가입</h2>
+                    <p class="login-subtitle">덕영고등학교 Make-DEV 서비스</p>
                     
-                    <div class="form-group">
-                        <label for="password">비밀번호 *</label>
-                        <input type="password" id="password" name="password" required placeholder="비밀번호를 입력하세요" minlength="6">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="confirmPassword">비밀번호 확인 *</label>
-                        <input type="password" id="confirmPassword" name="confirmPassword" required placeholder="비밀번호를 다시 입력하세요">
+                    <form id="signupForm" class="login-form-simple">
+                        <input type="email" id="email" name="email" required placeholder="이메일을 입력하세요" class="login-input">
+                        <input type="text" id="username" name="username" required placeholder="아이디를 입력하세요 (3~20자)" minlength="3" maxlength="20" pattern="[a-zA-Z0-9_-]+" class="login-input">
+                        <input type="password" id="password" name="password" required placeholder="비밀번호를 입력하세요" minlength="6" class="login-input">
+                        <input type="password" id="confirmPassword" name="confirmPassword" required placeholder="비밀번호를 다시 입력하세요" class="login-input">
                         <div id="passwordMatchStatus" class="password-status"></div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="fullName">이름 *</label>
-                        <input type="text" id="fullName" name="fullName" required placeholder="실명을 입력하세요">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="grade">학년 *</label>
-                        <select id="grade" name="grade" required>
+                        
+                        <input type="text" id="fullName" name="fullName" required placeholder="이름을 입력하세요" class="login-input">
+                        
+                        <select id="grade" name="grade" required class="login-input">
                             <option value="">학년 선택</option>
                             <option value="1">1학년</option>
                             <option value="2">2학년</option>
                             <option value="3">3학년</option>
                         </select>
-                    </div>
+                        
+                        <input type="text" id="className" name="className" required placeholder="반을 입력하세요" class="login-input">
+                        <input type="number" id="studentNumber" name="studentNumber" required placeholder="번호를 입력하세요" min="1" max="50" class="login-input">
+                        
+                        <button type="submit" class="login-submit-btn">회원가입</button>
+                    </form>
                     
-                    <div class="form-group">
-                        <label for="className">반 *</label>
-                        <input type="text" id="className" name="className" required placeholder="반을 입력하세요 (예: 1, 2, 3)">
+                    <div class="login-link">
+                        <p>이미 계정이 있으신가요? <a href="/login" class="signup-link">로그인하기</a></p>
                     </div>
-                    
-                    <div class="form-group">
-                        <label for="studentNumber">번호 *</label>
-                        <input type="number" id="studentNumber" name="studentNumber" required placeholder="번호를 입력하세요" min="1" max="50">
-                    </div>
-                    
-                    <button type="submit" class="register-btn">회원가입</button>
-                </form>
-                
-                <div class="login-link">
-                    <p>이미 계정이 있으신가요? <a href="/login">로그인하기</a></p>
                 </div>
             </div>
         </section>
@@ -88,11 +69,12 @@
                 <p>승인까지 1-2일 정도 소요될 수 있습니다.</p>
             </div>
             <div class="modal-actions">
-                <button onclick="closePendingModal()" class="btn-primary">확인</button>
+                <button id="closePendingModalBtn" class="btn-primary">확인</button>
             </div>
         </div>
     </div>
 
+    <script src="js/theme.js"></script>
     <script src="js/signup.js"></script>
 </body>
 </html>

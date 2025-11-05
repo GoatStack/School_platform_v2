@@ -11,10 +11,29 @@
         <div class="header-container">
             <h1 class="logo">DEV</h1>
             <div class="auth-nav">
+                <button class="theme-toggle" id="themeToggle" aria-label="테마 전환">
+                    <span id="themeIcon">☽</span>
+                </button>
                 <div id="userInfo" class="user-info" style="display: none;">
-                    <span id="userName"></span>
-                    <a href="/register" class="register-btn">등록신청</a>
-                    <button id="logoutBtn" class="logout-btn">로그아웃</button>
+                    <button class="menu-toggle" id="menuToggle" aria-label="메뉴">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                    <div class="dropdown-menu" id="dropdownMenu">
+                        <div class="dropdown-header">
+                            <span id="userName"></span>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <a href="/register" class="dropdown-item">
+                            <span class="dropdown-icon">+</span>
+                            등록신청
+                        </a>
+                        <button id="logoutBtn" class="dropdown-item logout-item">
+                            <span class="dropdown-icon">→</span>
+                            로그아웃
+                        </button>
+                    </div>
                 </div>
                 <div id="guestNav" class="guest-nav">
                     <a href="/login" class="login-btn">로그인</a>
@@ -24,20 +43,26 @@
     </header>
 
     <main class="main-content">
-        <section class="hero-section">
-            <div class="hero-container">
-            </div>
-        </section>
-
         <section id="projects" class="projects-section">
             <div class="projects-container">
+                <div class="section-header">
+                    <h2 class="section-title">프로젝트 갤러리</h2>
+                </div>
                 <div id="projects-grid" class="projects-grid">
                     <!-- 프로젝트 카드들이 여기에 동적으로 추가됩니다 -->
+                </div>
+                <div id="empty-state" class="empty-state" style="display: none;">
+                    <div class="empty-icon">📁</div>
+                    <h3>아직 등록된 프로젝트가 없습니다</h3>
+                    <p>첫 번째 프로젝트를 등록해보세요!</p>
                 </div>
             </div>
         </section>
     </main>
 
+
+    <script src="js/theme.js"></script>
+    <script src="js/auth.js"></script>
     <script src="js/script.js"></script>
 </body>
 </html>

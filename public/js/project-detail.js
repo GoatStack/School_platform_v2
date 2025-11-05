@@ -380,7 +380,7 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
-// 모달 배경 클릭 시 닫기
+// 모달 배경 클릭 시 닫기 및 버튼 이벤트 리스너
 document.addEventListener('DOMContentLoaded', function() {
     const modal = document.getElementById('fullscreenModal');
     if (modal) {
@@ -389,6 +389,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 closeFullscreen();
             }
         });
+    }
+
+    // 전체화면 버튼 이벤트 리스너
+    const closeBtn = document.getElementById('closeFullscreenBtn');
+    const prevBtn = document.getElementById('prevImageBtn');
+    const nextBtn = document.getElementById('nextImageBtn');
+    
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closeFullscreen);
+    }
+    
+    if (prevBtn) {
+        prevBtn.addEventListener('click', prevImage);
+    }
+    
+    if (nextBtn) {
+        nextBtn.addEventListener('click', nextImage);
     }
 });
 

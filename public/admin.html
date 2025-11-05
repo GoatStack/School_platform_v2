@@ -3,37 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>관리자 페이지 - SCHOOL_PLATFORM_V2</title>
+    <title>관리자</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/admin.css">
 </head>
 <body>
-    <header class="header">
-        <div class="header-container">
-            <a href="/" class="logo">DEV</a>
-            <div class="admin-nav">
-                <a href="/" class="back-btn">← 메인으로</a>
-                <button id="logoutBtn" class="logout-btn">로그아웃</button>
-            </div>
-        </div>
-    </header>
-
     <main class="main-content">
+        <!-- 테마 토글 버튼 -->
+        <button class="theme-toggle" id="themeToggle" aria-label="테마 전환">
+            <span id="themeIcon">☽</span>
+        </button>
+        
         <section class="admin-section">
             <div class="admin-container">
-                <h2>관리자 대시보드</h2>
-                
-                <!-- 로그인 폼 -->
+                <!-- 로그인 폼 (1단계: 사용자명/비밀번호) -->
                 <div id="loginForm" class="login-form">
                     <h3>관리자 로그인</h3>
-                    <form id="adminLoginForm" action="#" onsubmit="event.preventDefault(); return false;">
+                    <form id="adminLoginForm" action="#">
                         <div class="form-group">
-                            <label for="adminUsername">사용자명</label>
-                            <input type="text" id="adminUsername" name="username" required placeholder="관리자 사용자명">
+                            <label for="adminUsername">아이디</label>
+                            <input type="text" id="adminUsername" name="username" required placeholder="아이디를 입력하세요">
                         </div>
                         <div class="form-group">
                             <label for="adminPassword">비밀번호</label>
-                            <input type="password" id="adminPassword" name="password" required placeholder="비밀번호">
+                            <input type="password" id="adminPassword" name="password" required placeholder="비밀번호를 입력하세요">
+                        </div>
+                        <button type="submit" class="login-btn">로그인</button>
+                    </form>
+                </div>
+
+                <!-- PIN 입력 폼 (2단계) -->
+                <div id="pinForm" class="login-form" style="display: none;">
+                    <h3>PIN 인증</h3>
+                    <p>관리자 PIN을 입력하세요</p>
+                    <form id="adminPinForm" action="#">
+                        <div class="form-group">
+                            <label for="adminPin">PIN</label>
+                            <input type="password" id="adminPin" name="pin" required placeholder="PIN을 입력하세요" maxlength="6" pattern="[0-9]*" inputmode="numeric" autocomplete="off">
+                            <small>4~6자리 숫자 PIN을 입력하세요</small>
                         </div>
                         <button type="submit" class="login-btn">로그인</button>
                     </form>
@@ -41,31 +48,52 @@
 
                 <!-- 관리자 대시보드 -->
                 <div id="adminDashboard" class="admin-dashboard" style="display: none;">
-                <!-- 사이드바 토글 버튼 -->
-                <button id="sidebarToggle" class="sidebar-toggle">
-                    <span class="toggle-icon">☰</span>
-                </button>
+                    <!-- 사이드바 토글 버튼 -->
+                    <button id="sidebarToggle" class="sidebar-toggle">
+                        <span class="toggle-icon">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </span>
+                    </button>
 
-                <!-- 사이드바 오버레이 -->
-                <div id="sidebarOverlay" class="sidebar-overlay"></div>
+                    <!-- 사이드바 오버레이 -->
+                    <div id="sidebarOverlay" class="sidebar-overlay"></div>
 
-                <!-- 사이드바 -->
-                <div id="adminSidebar" class="admin-sidebar">
-                    <div class="sidebar-header">
-                        <h3>관리자 패널</h3>
-                        <button id="sidebarClose" class="sidebar-close">×</button>
+                    <!-- 사이드바 -->
+                    <div id="adminSidebar" class="admin-sidebar">
+                        <div class="sidebar-header">
+                            <h3>관리자 패널</h3>
+                            <button id="sidebarClose" class="sidebar-close">×</button>
+                        </div>
+                        <nav class="sidebar-nav">
+                            <button class="nav-item active" data-section="users">
+                                <span class="nav-icon">👥</span>
+                                사용자 관리
+                            </button>
+                            <button class="nav-item" data-section="projects">
+                                <span class="nav-icon">📁</span>
+                                프로젝트 관리
+                            </button>
+                            <button class="nav-item" data-section="logs">
+                                <span class="nav-icon">📋</span>
+                                활동 로그
+                            </button>
+                            <button class="nav-item" data-section="settings">
+                                <span class="nav-icon">⚙️</span>
+                                설정
+                            </button>
+                            <div class="sidebar-divider"></div>
+                            <a href="/" class="nav-item nav-link">
+                                <span class="nav-icon">←</span>
+                                메인으로
+                            </a>
+                            <button id="logoutBtn" class="nav-item nav-link logout-nav-item">
+                                <span class="nav-icon">→</span>
+                                로그아웃
+                            </button>
+                        </nav>
                     </div>
-                    <nav class="sidebar-nav">
-                        <button class="nav-item active" data-section="users">
-                            <span class="nav-icon">👥</span>
-                            사용자 관리
-                        </button>
-                        <button class="nav-item" data-section="projects">
-                            <span class="nav-icon">📁</span>
-                            프로젝트 관리
-                        </button>
-                    </nav>
-                </div>
 
                     <!-- 메인 콘텐츠 -->
                     <div class="admin-content">
@@ -76,6 +104,7 @@
                                 <div class="section-tabs">
                                     <button class="tab-btn active" data-tab="pending-users">승인 대기</button>
                                     <button class="tab-btn" data-tab="approved-users">승인된 사용자</button>
+                                    <button class="tab-btn" data-tab="rejected-users">거부된 사용자</button>
                                 </div>
                             </div>
 
@@ -107,6 +136,22 @@
                                     <h3>승인된 사용자 목록</h3>
                                     <div id="approvedUsers" class="applications-list">
                                         <!-- 승인된 사용자들이 여기에 표시됩니다 -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 거부된 사용자 -->
+                            <div id="rejectedUsersTab" class="tab-content">
+                                <div class="dashboard-stats">
+                                    <div class="stat-card">
+                                        <h3>거부된 사용자</h3>
+                                        <span id="rejectedUsersCount" class="stat-number">0</span>
+                                    </div>
+                                </div>
+                                <div class="approval-section">
+                                    <h3>거부된 사용자 목록</h3>
+                                    <div id="rejectedUsers" class="applications-list">
+                                        <!-- 거부된 사용자들이 여기에 표시됩니다 -->
                                     </div>
                                 </div>
                             </div>
@@ -154,18 +199,125 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- 설정 섹션 -->
+                        <div id="settingsSection" class="content-section">
+                            <div class="section-header">
+                                <h2>관리자 계정 설정</h2>
+                            </div>
+
+                            <div class="settings-container">
+                                <!-- 사용자명 변경 -->
+                                <div class="settings-card">
+                                    <h3>아이디 변경</h3>
+                                    <form id="changeUsernameForm" class="settings-form">
+                                        <div class="form-group">
+                                            <label for="currentPasswordForUsername">현재 비밀번호</label>
+                                            <input type="password" id="currentPasswordForUsername" required placeholder="현재 비밀번호를 입력하세요">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="newUsername">새 아이디</label>
+                                            <input type="text" id="newUsername" required placeholder="새 사용자명을 입력하세요" minlength="3" maxlength="20">
+                                        </div>
+                                        <button type="submit" class="btn-primary">아이디 변경</button>
+                                    </form>
+                                </div>
+
+                                <!-- 비밀번호 변경 -->
+                                <div class="settings-card">
+                                    <h3>비밀번호 변경</h3>
+                                    <form id="changePasswordForm" class="settings-form">
+                                        <div class="form-group">
+                                            <label for="currentPassword">현재 비밀번호</label>
+                                            <input type="password" id="currentPassword" required placeholder="현재 비밀번호를 입력하세요">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="newPassword">새 비밀번호</label>
+                                            <input type="password" id="newPassword" required placeholder="새 비밀번호를 입력하세요" minlength="8">
+                                            <small>최소 8자 이상이어야 합니다</small>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="confirmNewPassword">새 비밀번호 확인</label>
+                                            <input type="password" id="confirmNewPassword" required placeholder="새 비밀번호를 다시 입력하세요">
+                                        </div>
+                                        <button type="submit" class="btn-primary">비밀번호 변경</button>
+                                    </form>
+                                </div>
+
+                                <!-- PIN 변경 -->
+                                <div class="settings-card">
+                                    <h3>PIN 변경</h3>
+                                    <form id="changePinForm" class="settings-form">
+                                        <div class="form-group">
+                                            <label for="currentPinForChange">현재 PIN</label>
+                                            <input type="password" id="currentPinForChange" required placeholder="현재 PIN을 입력하세요" maxlength="6" pattern="[0-9]*" inputmode="numeric">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="newPin">새 PIN</label>
+                                            <input type="password" id="newPin" required placeholder="새 PIN을 입력하세요" minlength="4" maxlength="6" pattern="[0-9]*" inputmode="numeric">
+                                            <small>4~6자리 숫자 PIN을 입력하세요</small>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="confirmNewPin">새 PIN 확인</label>
+                                            <input type="password" id="confirmNewPin" required placeholder="새 PIN을 다시 입력하세요" maxlength="6" pattern="[0-9]*" inputmode="numeric">
+                                        </div>
+                                        <button type="submit" class="btn-primary">PIN 변경</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 활동 로그 섹션 -->
+                        <div id="logsSection" class="content-section">
+                            <div class="section-header">
+                                <h2>활동 로그</h2>
+                                <div class="section-tabs">
+                                    <button class="tab-btn active" data-tab="activity-logs">활동 로그</button>
+                                    <button class="tab-btn" data-tab="login-attempts">로그인 시도</button>
+                                </div>
+                            </div>
+
+                            <!-- 활동 로그 탭 -->
+                            <div id="activityLogsTab" class="tab-content active">
+                                <div class="approval-section">
+                                    <h3>관리자 활동 로그</h3>
+                                    <div id="activityLogsList" class="applications-list">
+                                        <!-- 활동 로그들이 여기에 표시됩니다 -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 로그인 시도 탭 -->
+                            <div id="loginAttemptsTab" class="tab-content">
+                                <div class="approval-section">
+                                    <h3>로그인 시도 기록</h3>
+                                    <div id="loginAttemptsList" class="applications-list">
+                                        <!-- 로그인 시도 기록들이 여기에 표시됩니다 -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
     </main>
 
+    <!-- 사용자 상세 정보 모달 -->
+    <div id="userDetailModal" class="modal" style="display: none;">
+        <div class="modal-content user-detail-modal-content">
+            <div class="modal-body user-detail-body" id="userDetailContent">
+                <!-- 사용자 상세 정보가 여기에 표시됩니다 -->
+            </div>
+        </div>
+    </div>
+
     <!-- 프로젝트 수정 모달 -->
     <div id="editModal" class="modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
                 <h3>프로젝트 수정</h3>
-                <span class="close" onclick="closeEditModal()">&times;</span>
+                <span class="close" id="closeEditModalBtn">&times;</span>
             </div>
             <form id="editProjectForm">
                 <div class="form-group">
@@ -211,20 +363,25 @@
                 <div class="form-group">
                     <label for="editDetailImages">프로젝트 이미지들</label>
                     <div class="image-upload-container">
-                        <input type="file" id="editDetailImages" name="detail_images" multiple accept="image/*">
+                        <input type="file" id="editDetailImages" name="detail_images" multiple accept="image/*" style="display: none;">
                         <input type="hidden" id="editDetailImagesJson" name="detail_images_json">
-                        <button type="button" id="editImageUploadBtn" class="upload-btn">여러 이미지 업로드</button>
+                        <div class="file-select-area" id="fileSelectArea">
+                            <span id="fileNameDisplay">선택된 파일 없음</span>
+                        </div>
                         <div id="editImagesPreview" class="images-preview"></div>
                     </div>
                 </div>
                 <div class="form-actions">
-                    <button type="button" onclick="closeEditModal()" class="btn-secondary">취소</button>
-                    <button type="submit" class="btn-primary">저장</button>
+                    <button type="button" id="cancelEditBtn" class="btn-cancel">취소</button>
+                    <button type="submit" class="btn-save">저장</button>
                 </div>
             </form>
         </div>
     </div>
 
+    <script src="js/theme.js"></script>
+    <script src="js/auth.js"></script>
     <script src="js/admin.js"></script>
 </body>
+</html>
 </html>
