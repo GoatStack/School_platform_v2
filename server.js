@@ -16,8 +16,13 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production-min-32-chars';
-const JWT_ADMIN_SECRET = process.env.JWT_ADMIN_SECRET || 'admin-secret-key-change-in-production-min-32-chars';
+const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_ADMIN_SECRET = process.env.JWT_ADMIN_SECRET;
+
+if (!JWT_SECRET || !JWT_ADMIN_SECRET) {
+    console.error('Set JWT_SECRET and JWT_ADMIN_SECRET in .env file');
+    process.exit(1);
+}
 
 // 임시 인증 세션 저장소 (메모리 기반, 서버 재시작 시 초기화)
 const tempAuthSessions = new Map(); // key: sessionId, value: { adminId, ipAddress, createdAt, pinAttempts }
